@@ -98,6 +98,10 @@ public class RadarBlockEntity extends SyncedGraphBlockEntity {
     private List<TargetRecord> lastLightTargets = new ArrayList<>();
     private final java.util.Set<Integer> lastLightLocked = new java.util.LinkedHashSet<>();
     private final java.util.Set<Integer> lastLightActive = new java.util.HashSet<>();
+    /** 上次推送的参考系快照（record equals——NaN 归位比较，载具不在 Sable 上不误报变化）。
+     *  The last pushed frame snapshot (record equality — NaN compares equal, so a
+     *  non-Sable radar does not report a change every tick). */
+    private io.github.y15173334444.create_schematic_compute.network.RadarTargetsPacket.Frame lastLightFrame;
 
     /** Client-side registry of all loaded radar block entities, used by RadarLockHandler to iterate radars for crosshair-lock UI. 客户端侧所有已加载雷达的注册表，用于 RadarLockHandler 遍历以支持准星锁定 UI。 */
     private static final java.util.Set<RadarBlockEntity> CLIENT_RADARS = new java.util.HashSet<>();
@@ -542,18 +546,29 @@ public class RadarBlockEntity extends SyncedGraphBlockEntity {
         //    throttling staunched that but dropped blips to 4Hz/0.5-block steps — the
         //    light channel now restores the rate.
         if (level != null && !level.isClientSide()) {
-            // ① 轻量目标通道：原始精度、变化即发 / light channel: full precision, send on change
+            // ① 轻量目标通道：原始精度、变化即发。变化检测含**参考系**（扫描中心+姿态）——
+            //    载具旋转保距（目标绝对坐标与距离都不变），只看目标表会漏发，姿态换算慢刷。
+            // Light channel: full precision, send on change. The change check includes the
+            // **reference frame** (scan center + attitude) — a rotating craft preserves
+            // distances (absolute target coords AND distances stay put), so a targets-only
+            // check would miss it and the attitude conversion would refresh slowly.
+            var frame = new io.github.y15173334444.create_schematic_compute.network.RadarTargetsPacket.Frame(
+                cachedSubWorldX, cachedSubWorldY, cachedSubWorldZ,
+                cachedSubYaw, cachedSubPitch, cachedSubRoll,
+                cachedSubQx, cachedSubQy, cachedSubQz, cachedSubQw);
             if (!targets.equals(lastLightTargets)
                 || !lockedTargets.equals(lastLightLocked)
-                || !activeTargets.equals(lastLightActive)) {
+                || !activeTargets.equals(lastLightActive)
+                || !frame.equals(lastLightFrame)) {
                 lastLightTargets = new ArrayList<>(targets);
                 lastLightLocked.clear(); lastLightLocked.addAll(lockedTargets);
                 lastLightActive.clear(); lastLightActive.addAll(activeTargets);
+                lastLightFrame = frame;
                 var sl = (net.minecraft.server.level.ServerLevel) level;
                 net.neoforged.neoforge.network.PacketDistributor.sendToPlayersTrackingChunk(sl,
                     new net.minecraft.world.level.ChunkPos(worldPosition),
                     new io.github.y15173334444.create_schematic_compute.network.RadarTargetsPacket(
-                        worldPosition, lastLightTargets,
+                        worldPosition, frame, lastLightTargets,
                         lastLightLocked.stream().mapToInt(i -> i).toArray(),
                         lastLightActive.stream().mapToInt(i -> i).toArray()));
             }
@@ -568,10 +583,21 @@ public class RadarBlockEntity extends SyncedGraphBlockEntity {
     }
 
     /** 轻量目标通道的应用端（20Hz 运动即达）。渲染器读 {@link #targets}（同一把锁），
-     *  锁定/分配集随包同步——高亮与 blip 同率。/ Apply from the light targets channel
-     *  (20Hz motion lands here). The renderer reads {@link #targets} under the same lock;
-     *  the lock/assignment sets ride along so highlights track at the same rate. */
-    public void applyTargetsSync(List<TargetRecord> newTargets, int[] locked, int[] active) {
+     *  锁定/分配集随包同步——高亮与 blip 同率；**参考系**（扫描中心+姿态）一并落缓存
+     *  字段，姿态换算与扫描中心移动同率（渲染器/锁定射线都读这些字段）。
+     *  Apply from the light targets channel (20Hz motion lands here). The renderer reads
+     *  {@link #targets} under the same lock; the lock/assignment sets ride along so
+     *  highlights track at the same rate; the **reference frame** (scan center + attitude)
+     *  lands in the cache fields too, so attitude conversion and scan-center motion share
+     *  the rate (the renderer and lock raycast both read them). */
+    public void applyTargetsSync(io.github.y15173334444.create_schematic_compute.network.RadarTargetsPacket.Frame frame,
+                                 List<TargetRecord> newTargets, int[] locked, int[] active) {
+        if (frame != null) {
+            cachedSubWorldX = frame.cx(); cachedSubWorldY = frame.cy(); cachedSubWorldZ = frame.cz();
+            cachedSubYaw = frame.yaw(); cachedSubPitch = frame.pitch(); cachedSubRoll = frame.roll();
+            cachedSubQx = frame.qx(); cachedSubQy = frame.qy();
+            cachedSubQz = frame.qz(); cachedSubQw = frame.qw();
+        }
         synchronized (targets) {
             targets.clear();
             if (newTargets != null) targets.addAll(newTargets);
