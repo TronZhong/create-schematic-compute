@@ -88,8 +88,12 @@ public class RadarBlockEntity extends SyncedGraphBlockEntity {
 
     /** Scan result cache — populated each tick on the server and read by the client-side blip renderer. 扫描结果缓存（服务端每 tick 填充，渲染器读取）。 */
     public final List<TargetRecord> targets = new ArrayList<>();
-    /** 上次推送给客户端的目标快照（去重门控）。/ Last-pushed target snapshot (push gate). */
-    private List<TargetRecord> lastPushedTargets = new ArrayList<>();
+    /** 目标同步推送门控（量化口径，P1-7）。旧实现逐字段比较含 x/y/z 的目标表，运动目标
+     *  让门控每 tick 全开、全量 BE NBT 砸向所有追踪客户端。/ Target-sync push gate
+     *  (quantized view, P1-7). The old per-field comparison included x/y/z, so moving
+     *  targets kept the gate open every tick and the full BE NBT hammered every client. */
+    private final io.github.y15173334444.create_schematic_compute.graph.RadarSyncGate syncGate =
+        new io.github.y15173334444.create_schematic_compute.graph.RadarSyncGate();
 
     /** Client-side registry of all loaded radar block entities, used by RadarLockHandler to iterate radars for crosshair-lock UI. 客户端侧所有已加载雷达的注册表，用于 RadarLockHandler 遍历以支持准星锁定 UI。 */
     private static final java.util.Set<RadarBlockEntity> CLIENT_RADARS = new java.util.HashSet<>();
@@ -514,18 +518,36 @@ public class RadarBlockEntity extends SyncedGraphBlockEntity {
         BusChannelHelper.syncIfBandsChanged(graph(), worldPosition, lastBusHashMap(), level);
         setChanged();
         // Force-sync targets to clients so the blip renderer stays up to date.
-        // 目标列表有变化才推送。此处推送的是**完整 BE NBT**（含整张图），无条件每 tick
-        // 推送会让所有追踪客户端每 tick 重载图——雷达编辑器"图每次重建"的根因
-        // （雷达诞生起即如此，非收敛引入；blip 的实时数值本就走 EvalSnapshot 广播）。
-        // Push only when the target list changed. This push carries the FULL BE NBT
-        // (whole graph included); pushing it unconditionally every tick made every
-        // tracking client reload the graph per tick — the "radar graph rebuilds every
-        // time" root cause (present since the radar was born, not a convergence
-        // regression; live blip values already flow via the EvalSnapshot broadcast).
-        if (level != null && !level.isClientSide() && !targets.equals(lastPushedTargets)) {
-            lastPushedTargets = new ArrayList<>(targets);
-            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        // 目标同步走量化门控（P1-7）：语义段（成员/名称/锁定/分配/设置）变化**立即**推送；
+        // 纯运动只有越过量化格/半径档才计变化，且两次推送至少隔 MOTION_MIN_INTERVAL_TICKS
+        // tick。旧门控逐字段比较含 x/y/z 的目标表——运动目标让门控每 tick 全开，全量
+        // BE NBT（含整图）砸向所有追踪客户端，「图每次重建」与拖拽卡顿的源头。目标的
+        // 实时数值本就走 EvalSnapshot 广播，此处只需让 blip 位置与锁定态跟上。
+        // Target sync rides the quantized gate (P1-7): the semantic section (membership /
+        // names / locks / assignments / settings) pushes immediately; pure motion counts
+        // as changed only across a quantization cell or radius bucket, at most once per
+        // MOTION_MIN_INTERVAL_TICKS ticks. The old gate compared target records
+        // field-by-field including x/y/z — moving targets held it open every tick and the
+        // FULL BE NBT (whole graph) hammered every tracking client, the source of "the
+        // graph rebuilds every time" and the drag stutter. Live blip values already flow
+        // via the EvalSnapshot broadcast; this keeps blip positions and lock state fresh.
+        if (level != null && !level.isClientSide()) {
+            var syncView = io.github.y15173334444.create_schematic_compute.graph.RadarSyncGate.Snapshot.of(
+                targets, lockedTargets, activeTargets, settingsSyncKey());
+            if (syncGate.shouldPush(syncView, level.getGameTime())) {
+                syncGate.markPushed(syncView, level.getGameTime());
+                level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+            }
         }
+    }
+
+    /** 设置指纹（同步门控语义段的一部分）：任一显示/扫描设置变化都必须触发推送。
+     *  Settings fingerprint — part of the gate's semantic section: any display/scan
+     *  setting change must trigger a push. */
+    private String settingsSyncKey() {
+        return scanRange + "|" + scanMode + "|" + displayScale + "|" + showPlayers + "|" + showMobs
+            + "|" + showSable + "|" + lockMode + "|" + displayStyle + "|" + lockDistance + "|"
+            + excludeHost + "|" + displayX + "|" + displayY + "|" + displayZ;
     }
 
     // ── Sable 访问已迁移到 SablePoseHelper 编译期 API（专用服务器安全） ──
@@ -572,7 +594,7 @@ public class RadarBlockEntity extends SyncedGraphBlockEntity {
             int structCount = 0;
 
             for (var o : origins) {
-                double sx = o[0], sy = o[1], sz = o[2];
+                double sx = o.x(), sy = o.y(), sz = o.z();
 
                 // Determine if this structure is the one hosting this radar.
                 // Tolerance of 0.01 accounts for floating-point drift.
@@ -583,7 +605,13 @@ public class RadarBlockEntity extends SyncedGraphBlockEntity {
                     && Math.abs(sy - cachedSubOriginY) < 0.01
                     && Math.abs(sz - cachedSubOriginZ) < 0.01;
                 if (!isHost && showSable) {
-                    targets.add(TargetRecord.fromSableStructure(scx, scy, scz, sx, sy, sz, "Sable Structure"));
+                    // 锁定 id 走结构身份（UUID），不走坐标——载具结构随移动坐标漂移，
+                    // 旧坐标哈希 id 每 tick 变、锁定下一 tick 被剪（「无法锁定 sable 结构」）。
+                    // Lock ids ride the structure identity (UUID), not coordinates — a moving
+                    // craft's origin drifts and the old position-hashed id churned every tick,
+                    // pruned on the next ("cannot lock Sable structures").
+                    targets.add(TargetRecord.fromSableStructure(scx, scy, scz, sx, sy, sz,
+                        o.identity(), "Sable Structure"));
                     structCount++;
                 }
             }

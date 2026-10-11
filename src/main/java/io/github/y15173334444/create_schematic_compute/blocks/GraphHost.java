@@ -561,6 +561,14 @@ public class GraphHost {
      *  Writes common fields (graph/running/runtime); type-specific data appended by host. */
     public void saveHostNBT(CompoundTag t, HolderLookup.Provider r) {
         t.put("graph", graph.save(r));
+        // 图内容指纹 = 图代际（实例内单调计数，只随图变更增长，同代际即同内容）——
+        // loadHostNBT 据此跳过「内容未变」的重复重载（雷达目标同步的每 tick 推送
+        // 不再砸本地图）。/ Graph content fingerprint = the graph generation (a
+        // per-instance monotonic counter that grows only on graph changes — same
+        // generation means same content). loadHostNBT uses it to skip reloading
+        // unchanged content (the radar's per-tick target pushes stop clobbering the
+        // local graph).
+        t.putInt("hostGraphGen", graph.graphGeneration);
         t.putBoolean("running", running);
         t.put("runtime", runtimeState.save());
     }
@@ -573,18 +581,36 @@ public class GraphHost {
      * editor is open with un-ACKed ops, or during pixel painting / display dragging)
      * now goes through {@link GraphBlockEntity#isGraphReplaceBlocked(int)}.
      */
+    /** 上次成功装入的 hostGraphGen（图内容指纹）；MIN_VALUE = 尚未装入。
+     *  The hostGraphGen (graph content fingerprint) of the last successful load;
+     *  MIN_VALUE = nothing loaded yet. */
+    private int lastLoadedGraphGen = Integer.MIN_VALUE;
+
     public void loadHostNBT(CompoundTag t, HolderLookup.Provider r) {
         if (t.contains("graph")) {
-            // 阶段 1：判定收敛到 GraphHostOwner —— 原先此处与 SyncedGraphBlockEntity
-            // 各写一份，两线判定漂移会让客户端行为不一致。
-            // Phase 1: the check converged into GraphHostOwner — this site and
-            // SyncedGraphBlockEntity used to each keep a copy, and drift between them
-            // would make the two lines behave differently on the client.
-            if (!owner.isGraphReplaceBlocked(pendingLocalOps)) {
+            int tagGen = t.contains("hostGraphGen") ? t.getInt("hostGraphGen") : -1;
+            // 图内容与已装入的完全一致（同代际）：跳过替换、不动本地图代际——目标/设置/
+            // 运行段照常刷新。雷达目标同步的每 tick 推送正是这种包，重载它就是
+            // 「图每次重建 / 拖拽卡顿」的直接来源。无指纹的旧数据（tagGen=-1）一律重载。
+            // The tag's graph matches what is already loaded (same generation): skip the
+            // replacement, leave the local graph and its generation alone — the
+            // targets/settings/runtime sections still refresh. The radar's per-tick
+            // target push is exactly this kind of packet; loading it is the direct source
+            // of "the graph rebuilds every time" / drag stutter. Tags without the
+            // fingerprint (tagGen=-1) always reload.
+            if (tagGen != -1 && tagGen == lastLoadedGraphGen && graph != null && graphReady) {
+                // skip graph replacement / 跳过图替换
+            } else if (!owner.isGraphReplaceBlocked(pendingLocalOps)) {
+                // 阶段 1：判定收敛到 GraphHostOwner —— 原先此处与 SyncedGraphBlockEntity
+                // 各写一份，两线判定漂移会让客户端行为不一致。
+                // Phase 1: the check converged into GraphHostOwner — this site and
+                // SyncedGraphBlockEntity used to each keep a copy, and drift between them
+                // would make the two lines behave differently on the client.
                 graph = NodeGraph.load(t.getCompound("graph"), r);
                 rs.onLoad(graph);
                 this.graphReady = true;
                 this.pendingLocalOps = 0;
+                this.lastLoadedGraphGen = tagGen;
                 var client = lvl();
                 if (client != null && client.isClientSide()) {
                     graph.bumpGeneration();

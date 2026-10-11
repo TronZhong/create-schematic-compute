@@ -83,33 +83,45 @@ public class SablePoseHelper {
         } catch (Exception ignored) { return null; }
     }
 
+    /** 子关卡的世界原点 + 稳定身份。identity 随结构持久（UUID 等）、**移动不变**——
+     *  锁定 id 必须由它导出，绝不能用坐标推导（见 TargetRecord.fromSableStructure）。
+     *  A sub-level's world origin plus its stable identity. The identity persists with
+     *  the structure (its UUID etc.) and is **movement-invariant** — lock ids must derive
+     *  from it, never from coordinates (see TargetRecord.fromSableStructure). */
+    public record SubLevelOrigin(int identity, double x, double y, double z) {}
+
     /**
-     * Enumerate the world-space origin [x,y,z] of every loaded Sable sub-level.
+     * Enumerate every loaded Sable sub-level's world-space origin and stable identity.
      * Used by {@code RadarBlockEntity} structure scanning. Compile-time Sable
      * access — dedicated-server safe (only the Level overload of getContainer is
      * resolved, never the ClientLevel one). Returns empty list when Sable absent.
      * <p>
-     * 枚举所有已加载 Sable 子关卡的世界空间原点 [x,y,z]。
+     * 枚举所有已加载 Sable 子关卡的世界空间原点与稳定身份。
      * 供 RadarBlockEntity 结构扫描使用。编译期 Sable 访问——专用服务器安全
      * （只解析 getContainer 的 Level 重载，绝不触碰 ClientLevel 重载）。
      * Sable 未安装时返回空列表。
      *
      * @param level 目标世界（服务端）/ the target level (server-side)
-     * @return 世界空间原点列表，空当 Sable 未加载 / world-space origins, empty if Sable absent
+     * @return 原点+身份列表，空当 Sable 未加载 / origins with identities, empty if Sable absent
      */
-    public static java.util.List<double[]> getAllSubLevelOrigins(Level level) {
+    public static java.util.List<SubLevelOrigin> getAllSubLevelOrigins(Level level) {
         if (level == null || level.isClientSide()) return java.util.List.of();
         if (!net.neoforged.fml.ModList.get().isLoaded("sable")) return java.util.List.of();
         try {
             var container = SubLevelContainer.getContainer(level);
             if (container == null) return java.util.List.of();
-            var out = new java.util.ArrayList<double[]>();
+            var out = new java.util.ArrayList<SubLevelOrigin>();
             for (var subLevel : container.getAllSubLevels()) {
                 var pose = subLevel.logicalPose();
                 if (pose == null) continue;
                 var pos = pose.position();
                 if (pos == null) continue;
-                out.add(new double[]{pos.x(), pos.y(), pos.z()});
+                var uid = subLevel.getUniqueId();
+                // 身份 = 子关卡 UUID（随结构保存、移动不变）；极端缺 UUID 时退回对象标识
+                // Identity = the sub-level's UUID (saved with the structure, invariant
+                // under movement); object identity as the last-resort fallback.
+                int identity = uid != null ? uid.hashCode() : System.identityHashCode(subLevel);
+                out.add(new SubLevelOrigin(identity, pos.x(), pos.y(), pos.z()));
             }
             return out;
         } catch (Exception ignored) { return java.util.List.of(); }

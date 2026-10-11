@@ -26,15 +26,30 @@ public record TargetRecord(double x, double y, double z, int entityId, float dis
             type, e.getName().getString());
     }
 
-    /** 从 Sable 结构创建目标记录，以 (cx, cy, cz) 为扫描中心计算距离 */
+    /** 从 Sable 结构创建目标记录，以 (cx, cy, cz) 为扫描中心计算距离。
+     *  {@code identity} 是结构的**稳定身份**（子关卡 UUID 等，移动/重载不变）——
+     *  绝不能用世界坐标推导：载具结构一移动坐标就变，按坐标哈希的 id 每 tick 漂移，
+     *  锁定下一 tick 就被「不在扫描范围」的清理剪掉（「无法锁定 sable 结构」）。
+     *  Create a target record for a Sable structure, distance measured from the scan
+     *  center (cx, cy, cz). {@code identity} is the structure's **stable identity**
+     *  (the sub-level UUID etc. — invariant under movement and reloads); never derive
+     *  it from world coordinates: a moving craft's origin shifts every tick, so a
+     *  position-hashed id churns and the out-of-range lock prune drops the lock on the
+     *  next tick ("cannot lock Sable structures"). */
     public static TargetRecord fromSableStructure(double cx, double cy, double cz,
-                                                   double sx, double sy, double sz, String name) {
+                                                   double sx, double sy, double sz,
+                                                   int identity, String name) {
         double dx = sx - cx;
         double dy = sy - cy;
         double dz = sz - cz;
         float dist = (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
-        // 用结构世界坐标生成稳定的负值 ID，使锁定系统可区分不同结构
-        int id = -(Math.abs(java.util.Objects.hash(Math.round(sx*100), Math.round(sy*100), Math.round(sz*100))) % 999999) - 1;
-        return new TargetRecord(sx, sy, sz, id, dist, TYPE_SABLE, name);
+        return new TargetRecord(sx, sy, sz, sableId(identity), dist, TYPE_SABLE, name);
+    }
+
+    /** 结构身份 → 稳定负 id（恒为负，避开正的实体 id；& 0x7FFFFFFF 防 Math.abs 溢出）。
+     *  Structure identity → stable negative id (always negative, clear of positive entity
+     *  ids; & 0x7FFFFFFF guards the Math.abs overflow). */
+    public static int sableId(int identity) {
+        return -((identity & 0x7FFFFFFF) % 999999) - 1;
     }
 }
