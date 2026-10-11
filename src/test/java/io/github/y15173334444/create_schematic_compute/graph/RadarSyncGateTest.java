@@ -8,16 +8,14 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * 雷达目标同步门控回归（P1-7）：旧门控逐字段比较含 x/y/z 的目标表，运动目标让门控
- * 每 tick 全开 → 每 tick 全量 BE NBT 砸向所有追踪客户端（「图每次重建」、拖拽卡顿）。
- * 量化口径：纯运动要越过量化格/半径档才算变化且受节流；语义（成员/锁定/设置）立即推；
- * 距离排序的顺序抖动不算变化。
- * Radar target-sync gate regression (P1-7): the old gate compared target records
- * field-by-field including x/y/z, so moving targets held it open every tick and the full
- * BE NBT hammered every tracking client ("the graph rebuilds every time", drag stutter).
- * Quantized semantics: pure motion must cross a quantization cell / radius bucket to
- * count as changed (and is rate-limited); semantic changes (membership/locks/settings)
- * push immediately; distance-sort shuffling is not a change.
+ * 雷达同步数据面回归（P1-7 终态）：旧门控逐字段比较含 x/y/z 的目标表，运动目标让
+ * 全量 BE NBT 每 tick 砸向所有追踪客户端（图每次重建、拖拽卡顿）。终态是数据面拆分——
+ * 运动走轻量通道（原始精度、变化即发、20Hz），全量 NBT 只看语义。
+ * Radar sync data-plane regression (P1-7 final shape): the old gate compared target
+ * records field-by-field including x/y/z, so moving targets made the full BE NBT hammer
+ * every tracking client per tick (graph rebuilt every time, drag stutter). The final
+ * shape splits the data planes — motion rides the light channel (full precision,
+ * send-on-change, 20Hz) and the full NBT gates on semantics only.
  */
 class RadarSyncGateTest {
 
@@ -26,82 +24,66 @@ class RadarSyncGateTest {
     }
 
     @Test
-    @DisplayName("量化格内运动不推；跨格受节流；语义变化立即推")
-    void quantizedMotionThrottled_semanticsImmediate() {
+    @DisplayName("语义变化（成员/锁定/设置）立即推全量 NBT")
+    void semanticChangesPushImmediately() {
         var gate = new RadarSyncGate();
-        var t0 = List.of(target(1, 0, 0, 0, 0f));
-        var s0 = RadarSyncGate.Snapshot.of(t0, List.of(), List.of(), "k");
-        assertTrue(gate.shouldPush(s0, 0), "first push always fires");
-        gate.markPushed(s0, 0);
-        // 调用方契约：只有真推送才 markPushed——被跳过的推送不记账，节流时钟不被污染
-        // Caller contract: markPushed only after a real push — skipped pushes are not
-        // recorded, so the throttle clock stays clean
+        var s0 = RadarSyncGate.Snapshot.of(List.of(target(1, 0, 0, 0, 0f)), List.of(), "k");
+        assertTrue(gate.shouldPush(s0), "first push always fires");
+        gate.markPushed(s0);
+        assertFalse(gate.shouldPush(s0), "unchanged semantics must not push");
 
-        // 量化格内抖动（<0.5 块）：不推 / sub-quantum jitter: no push
-        var t1 = List.of(target(1, 0.2, 0, 0, 0.2f));
-        var s1 = RadarSyncGate.Snapshot.of(t1, List.of(), List.of(), "k");
-        assertFalse(gate.shouldPush(s1, 1), "sub-quantum motion must not push");
-
-        // 跨量化格但节流间隔未到（上次推送在 tick 0）：不推
-        // Crossed a cell inside the throttle window (last push at tick 0): no push
-        var t2 = List.of(target(1, 5, 0, 0, 5f));
-        var s2 = RadarSyncGate.Snapshot.of(t2, List.of(), List.of(), "k");
-        assertFalse(gate.shouldPush(s2, 2), "motion-only change is throttled");
-
-        // 节流间隔到：推 / throttle window elapsed: push
-        assertTrue(gate.shouldPush(s2, 0 + RadarSyncGate.MOTION_MIN_INTERVAL_TICKS),
-            "motion-only change pushes once the interval elapses");
-        gate.markPushed(s2, RadarSyncGate.MOTION_MIN_INTERVAL_TICKS);
-
-        // 语义变化（锁定）：无视节流立即推 / lock change: immediate regardless of throttle
-        var s3 = RadarSyncGate.Snapshot.of(t2, List.of(1), List.of(), "k");
-        assertTrue(gate.shouldPush(s3, RadarSyncGate.MOTION_MIN_INTERVAL_TICKS + 1),
-            "semantic change must push immediately");
-    }
-
-    @Test
-    @DisplayName("成员进出与设置变化都是语义变化，立即推")
-    void membershipAndSettingsAreSemantic() {
-        var gate = new RadarSyncGate();
-        var s0 = RadarSyncGate.Snapshot.of(List.of(target(1, 0, 0, 0, 0f)), List.of(), List.of(), "k");
-        gate.markPushed(s0, 0);
-
-        // 进新目标 / new target appears
+        // 目标成员进出 / membership change
         var sNew = RadarSyncGate.Snapshot.of(
-            List.of(target(1, 0, 0, 0, 0f), target(2, 3, 0, 0, 3f)), List.of(), List.of(), "k");
-        assertTrue(gate.shouldPush(sNew, 1), "membership change is semantic");
+            List.of(target(1, 0, 0, 0, 0f), target(2, 3, 0, 0, 3f)), List.of(), "k");
+        assertTrue(gate.shouldPush(sNew), "membership change is semantic");
+
+        // 锁定变化 / lock change
+        var sLock = RadarSyncGate.Snapshot.of(List.of(target(1, 0, 0, 0, 0f)), List.of(1), "k");
+        assertTrue(gate.shouldPush(sLock), "lock change is semantic");
 
         // 设置指纹变化 / settings fingerprint change
-        var sCfg = RadarSyncGate.Snapshot.of(List.of(target(1, 0, 0, 0, 0f)), List.of(), List.of(), "k2");
-        assertTrue(gate.shouldPush(sCfg, 1), "settings change is semantic");
-
-        // 分配集变化 / assignment change
-        var sAct = RadarSyncGate.Snapshot.of(List.of(target(1, 0, 0, 0, 0f)), List.of(), List.of(1), "k");
-        assertTrue(gate.shouldPush(sAct, 1), "assignment change is semantic");
+        var sCfg = RadarSyncGate.Snapshot.of(List.of(target(1, 0, 0, 0, 0f)), List.of(), "k2");
+        assertTrue(gate.shouldPush(sCfg), "settings change is semantic");
     }
 
     @Test
-    @DisplayName("距离排序的顺序抖动不算变化（视图按 id 归一）")
+    @DisplayName("纯运动不触发全量 NBT（运动数据走轻量通道，20Hz 原始精度）")
+    void motionDoesNotTriggerFullNbt() {
+        var gate = new RadarSyncGate();
+        var s0 = RadarSyncGate.Snapshot.of(List.of(target(1, 0, 0, 0, 0f)), List.of(), "k");
+        gate.markPushed(s0);
+        // 目标飞速移动：语义不变 → 全量 NBT 不推 / a target flying around: no semantic change, no fat push
+        var sMoved = RadarSyncGate.Snapshot.of(List.of(target(1, 50, 80, -30, 90f)), List.of(), "k");
+        assertFalse(gate.shouldPush(sMoved), "motion must never ride the whole-graph payload");
+
+        // 同一时刻，轻量通道用**原始**比较必须看得见哪怕 0.2 块的运动
+        // Meanwhile the light channel's raw comparison must see even a 0.2-block move
+        var tSmall1 = List.of(target(1, 0, 0, 0, 0f));
+        var tSmall2 = List.of(target(1, 0.2, 0, 0, 0.2f));
+        assertNotEquals(tSmall1, tSmall2,
+            "the light channel compares raw records — full precision, no quantization");
+    }
+
+    @Test
+    @DisplayName("分配集是运动派生态：不进全量 NBT 语义段（随轻量通道走）")
+    void assignmentSetIsNotSemantic() {
+        // Snapshot 不含分配集：相同成员/锁定/设置的视图必须相等
+        // The Snapshot excludes assignments: same membership/locks/settings must compare equal
+        var a = RadarSyncGate.Snapshot.of(List.of(target(1, 0, 0, 0, 0f)), List.of(), "k");
+        var b = RadarSyncGate.Snapshot.of(List.of(target(1, 9, 9, 9, 12f)), List.of(), "k");
+        assertEquals(a, b, "motion-derived assignment churn must not appear in the semantic view");
+    }
+
+    @Test
+    @DisplayName("距离排序的顺序抖动不算变化（视图按字典序归一）")
     void distanceSortShufflingIsNotAChange() {
         var gate = new RadarSyncGate();
-        // 两个目标换位（距离序颠倒），内容相同 / two targets swap order (distance order), same content
         var a = RadarSyncGate.Snapshot.of(
-            List.of(target(1, 1, 0, 0, 1f), target(2, 2, 0, 0, 2f)), List.of(), List.of(), "k");
+            List.of(target(1, 1, 0, 0, 1f), target(2, 2, 0, 0, 2f)), List.of(), "k");
         var b = RadarSyncGate.Snapshot.of(
-            List.of(target(2, 2, 0, 0, 2f), target(1, 1, 0, 0, 1f)), List.of(), List.of(), "k");
-        gate.markPushed(a, 0);
-        assertFalse(gate.shouldPush(b, 100), "reordering by distance must not count as a change");
-    }
-
-    @Test
-    @DisplayName("半径档跨档算运动变化（半径档口径）")
-    void distanceBucketCrossingCountsAsMotion() {
-        var gate = new RadarSyncGate();
-        var s0 = RadarSyncGate.Snapshot.of(List.of(target(1, 0, 0, 0, 3.9f)), List.of(), List.of(), "k");
-        gate.markPushed(s0, 0);
-        // 位置不动、距离跨 2 块档 / same position, distance crosses a 2-block bucket
-        var s1 = RadarSyncGate.Snapshot.of(List.of(target(1, 0, 0, 0, 6.1f)), List.of(), List.of(), "k");
-        assertTrue(gate.shouldPush(s1, 100), "crossing a radius bucket is a motion change");
+            List.of(target(2, 2, 0, 0, 2f), target(1, 1, 0, 0, 1f)), List.of(), "k");
+        gate.markPushed(a);
+        assertFalse(gate.shouldPush(b), "reordering by distance must not count as a change");
     }
 
     @Test

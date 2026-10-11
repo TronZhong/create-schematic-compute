@@ -94,6 +94,10 @@ public class RadarBlockEntity extends SyncedGraphBlockEntity {
      *  targets kept the gate open every tick and the full BE NBT hammered every client. */
     private final io.github.y15173334444.create_schematic_compute.graph.RadarSyncGate syncGate =
         new io.github.y15173334444.create_schematic_compute.graph.RadarSyncGate();
+    /** 轻量目标通道的上次推送快照（原始精度去重）/ last light-channel push snapshot (full-precision dedup) */
+    private List<TargetRecord> lastLightTargets = new ArrayList<>();
+    private final java.util.Set<Integer> lastLightLocked = new java.util.LinkedHashSet<>();
+    private final java.util.Set<Integer> lastLightActive = new java.util.HashSet<>();
 
     /** Client-side registry of all loaded radar block entities, used by RadarLockHandler to iterate radars for crosshair-lock UI. 客户端侧所有已加载雷达的注册表，用于 RadarLockHandler 遍历以支持准星锁定 UI。 */
     private static final java.util.Set<RadarBlockEntity> CLIENT_RADARS = new java.util.HashSet<>();
@@ -518,26 +522,67 @@ public class RadarBlockEntity extends SyncedGraphBlockEntity {
         BusChannelHelper.syncIfBandsChanged(graph(), worldPosition, lastBusHashMap(), level);
         setChanged();
         // Force-sync targets to clients so the blip renderer stays up to date.
-        // 目标同步走量化门控（P1-7）：语义段（成员/名称/锁定/分配/设置）变化**立即**推送；
-        // 纯运动只有越过量化格/半径档才计变化，且两次推送至少隔 MOTION_MIN_INTERVAL_TICKS
-        // tick。旧门控逐字段比较含 x/y/z 的目标表——运动目标让门控每 tick 全开，全量
-        // BE NBT（含整图）砸向所有追踪客户端，「图每次重建」与拖拽卡顿的源头。目标的
-        // 实时数值本就走 EvalSnapshot 广播，此处只需让 blip 位置与锁定态跟上。
-        // Target sync rides the quantized gate (P1-7): the semantic section (membership /
-        // names / locks / assignments / settings) pushes immediately; pure motion counts
-        // as changed only across a quantization cell or radius bucket, at most once per
-        // MOTION_MIN_INTERVAL_TICKS ticks. The old gate compared target records
-        // field-by-field including x/y/z — moving targets held it open every tick and the
-        // FULL BE NBT (whole graph) hammered every tracking client, the source of "the
-        // graph rebuilds every time" and the drag stutter. Live blip values already flow
-        // via the EvalSnapshot broadcast; this keeps blip positions and lock state fresh.
+        //
+        // ── 数据面两层（P1-7 终态）──
+        // ① **轻量目标通道**（RadarTargetsPacket）：目标/锁定/分配的**原始**变化走小包
+        //    全量率推送——blip 位置保持 20Hz 刷新、精度不打折。
+        // ② **全量 BE NBT**（含整图）只在语义段（成员/名称/锁定/设置）变化时推送；
+        //    运动数据永远不搭整图的车。旧门控逐字段比较含 x/y/z 的目标表，运动目标
+        //    让它每 tick 全开——整图 NBT 每 tick 砸向所有追踪客户端（图每次重建、拖拽
+        //    卡顿）；量化节流虽止了血，但 blip 掉到 4Hz/0.5 块步进，现由轻量通道补回。
+        // ── Two data planes (P1-7 final shape) ──
+        // ① Light targets channel (RadarTargetsPacket): raw changes to targets/locks/
+        //    assignments ride a small packet at full rate — blips keep 20Hz refresh at
+        //    full precision.
+        // ② The FULL BE NBT (whole graph) pushes only on semantic change (membership /
+        //    names / locks / settings); motion never rides the whole-graph payload. The
+        //    old gate compared target records field-by-field including x/y/z, so moving
+        //    targets held it open every tick and the whole-graph NBT hammered every
+        //    tracking client (graph rebuilt every time, drag stutter); quantized
+        //    throttling staunched that but dropped blips to 4Hz/0.5-block steps — the
+        //    light channel now restores the rate.
         if (level != null && !level.isClientSide()) {
+            // ① 轻量目标通道：原始精度、变化即发 / light channel: full precision, send on change
+            if (!targets.equals(lastLightTargets)
+                || !lockedTargets.equals(lastLightLocked)
+                || !activeTargets.equals(lastLightActive)) {
+                lastLightTargets = new ArrayList<>(targets);
+                lastLightLocked.clear(); lastLightLocked.addAll(lockedTargets);
+                lastLightActive.clear(); lastLightActive.addAll(activeTargets);
+                var sl = (net.minecraft.server.level.ServerLevel) level;
+                net.neoforged.neoforge.network.PacketDistributor.sendToPlayersTrackingChunk(sl,
+                    new net.minecraft.world.level.ChunkPos(worldPosition),
+                    new io.github.y15173334444.create_schematic_compute.network.RadarTargetsPacket(
+                        worldPosition, lastLightTargets,
+                        lastLightLocked.stream().mapToInt(i -> i).toArray(),
+                        lastLightActive.stream().mapToInt(i -> i).toArray()));
+            }
+            // ② 全量 NBT：语义门控 / full NBT: semantic gate
             var syncView = io.github.y15173334444.create_schematic_compute.graph.RadarSyncGate.Snapshot.of(
-                targets, lockedTargets, activeTargets, settingsSyncKey());
-            if (syncGate.shouldPush(syncView, level.getGameTime())) {
-                syncGate.markPushed(syncView, level.getGameTime());
+                targets, lockedTargets, settingsSyncKey());
+            if (syncGate.shouldPush(syncView)) {
+                syncGate.markPushed(syncView);
                 level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
             }
+        }
+    }
+
+    /** 轻量目标通道的应用端（20Hz 运动即达）。渲染器读 {@link #targets}（同一把锁），
+     *  锁定/分配集随包同步——高亮与 blip 同率。/ Apply from the light targets channel
+     *  (20Hz motion lands here). The renderer reads {@link #targets} under the same lock;
+     *  the lock/assignment sets ride along so highlights track at the same rate. */
+    public void applyTargetsSync(List<TargetRecord> newTargets, int[] locked, int[] active) {
+        synchronized (targets) {
+            targets.clear();
+            if (newTargets != null) targets.addAll(newTargets);
+        }
+        if (locked != null) {
+            lockedTargets.clear();
+            for (int id : locked) lockedTargets.add(id);
+        }
+        if (active != null) {
+            activeTargets.clear();
+            for (int id : active) activeTargets.add(id);
         }
     }
 

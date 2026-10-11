@@ -86,6 +86,8 @@ public class AllPackets {
         registrar.playToServer(GraphLeavePacket.TYPE, GraphLeavePacket.CODEC, GraphLeavePacket::handle);
         // v1.2.4+: Server-authoritative evaluation sync
         registrar.playToClient(ClientboundGraphEvalPacket.TYPE, ClientboundGraphEvalPacket.CODEC, ClientboundGraphEvalPacket::handle);
+        // v1.2.6: radar light targets channel (S→C) — 20Hz blip positions without the whole-graph NBT
+        registrar.playToClient(RadarTargetsPacket.TYPE, RadarTargetsPacket.CODEC, RadarTargetsPacket::handle);
         // v1.2.6: audio note-event dispatch (S→C)
         registrar.playToClient(NoteEventPacket.TYPE, NoteEventPacket.CODEC, NoteEventPacket::handle);
         // v1.2.6: music stop marker (S→C) — cancel the speaker's queued unplayed voices
