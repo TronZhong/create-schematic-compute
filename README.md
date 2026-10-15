@@ -1,7 +1,7 @@
 # Create: Schematic Compute
 
 <p align="center">
-  <b>🎮 12 Programmable Blocks · 101 Node Types · Formula Syntax Highlighting & Autocomplete · Multiplayer Collaboration</b><br>
+  <b> 12 Programmable Blocks · 101 Node Types · Formula Syntax Highlighting & Autocomplete · Multiplayer Collaboration</b><br>
   <b>十二种可编程方块 · 101种节点 · 公式语法高亮与自动补全 · 多人实时协作</b><br>
   <i>Drag, connect, and build logic — just like Unreal Engine Blueprints!</i><br>
   <i>拖拽连接，构建逻辑 — 像虚幻引擎蓝图一样直观！</i><br>
@@ -19,7 +19,7 @@
 
 ---
 
-## 📖 Overview / 简介
+##  Overview / 简介
 
 **🇬🇧** Create: Schematic Compute is a **Create mod addon** that introduces **12 programmable blocks + 1 portable terminal** with a **visual node-based programming system**. Instead of writing complex redstone circuits, simply drag and connect nodes to build logic — just like Unreal Engine Blueprints or Blender Geometry Nodes. Each computer runs at **20Hz (every game tick)** for real-time control. **All 12 blocks support real-time multiplayer collaborative editing** with live cursor tracking and node lock protection. The **FORMULA script editor** features syntax highlighting (9 token colours), intelligent autocomplete (functions, variables, `@output`), real-time validation with error badges, and named constants `(PI)`/`(E)`.
 
@@ -27,31 +27,40 @@
 
 ---
 
-## ❓ FAQ / 常见问题
+## Mod Detail / 模组详情
 
-<details>
-<summary><b>Node editor laggy? / 节点编辑器卡顿？</b></summary>
-Editor drawing is viewport-culled (v1.2.5.2): only on-screen nodes cost render time. 1024 nodes on screen runs fine — node count and PID count are no longer practical limits. / v1.2.5.2 起编辑器绘制做了视口裁剪（只画屏内节点）：同屏 1024 个节点也无压力，节点数量与 PID 数量不再是实际限制。
-</details>
+- For a detailed explanation, see **[`mod-detail.md`](https://github.com/y15173334444/create-schematic-compute/blob/main/docs/mod-detail.md)**. / 详细讲解见 **[`mod-detail.md`](https://github.com/y15173334444/create-schematic-compute/blob/main/docs/mod-detail.md)**。
 
-<details>
-<summary><b>Speed Proxy not working? / 转速代理不工作？</b></summary>
-Place directly adjacent to a Speed Controller. / 放置在转速控制器相邻面。
-</details>
 
-<details>
-<summary><b>State lost after schematic? / 蓝图放置后状态丢失？</b></summary>
-Use Create 6.0.10+. Full NBT interfaces registered. / 确保使用Create 6.0.10+。
-</details>
-
-<details>
-<summary><b>Can computers communicate? / 计算机可以通信吗？</b></summary>
-Yes — Private Signal I/O (named channels) or BUS_IN/BUS_OUT (banded). / 可以——私有信号I/O或BUS总线。
-</details>
 
 ---
 
-## 📥 Installation / 安装
+##  FAQ / 常见问题
+
+
+<summary><b>Node editor laggy? / 节点编辑器卡顿？</b></summary>
+
+Editor drawing is viewport-culled (v1.2.5.2): only on-screen nodes cost render time. 1024 nodes on screen runs fine — node count and PID count are no longer practical limits. / v1.2.5.2 起编辑器绘制做了视口裁剪（只画屏内节点）：同屏 1024 个节点也无压力，节点数量与 PID 数量不再是实际限制。
+
+
+<summary><b>Speed Proxy not working? / 转速代理不工作？</b></summary>
+
+Place directly adjacent to a Speed Controller. / 放置在转速控制器相邻面。
+
+
+<summary><b>State lost after schematic? / 蓝图放置后状态丢失？</b></summary>
+
+Use Create 6.0.10+. Full NBT interfaces registered. / 确保使用Create 6.0.10+。
+
+
+<summary><b>Can computers communicate? / 计算机可以通信吗？</b></summary>
+
+Yes — Private Signal I/O (named channels) or BUS_IN/BUS_OUT (banded). / 可以——私有信号I/O或BUS总线。
+
+
+---
+
+##  Installation / 安装
 
 | Dependency / 依赖 | Version / 版本 |
 |------------------|---------------|
@@ -63,17 +72,26 @@ Yes — Private Signal I/O (named channels) or BUS_IN/BUS_OUT (banded). / 可以
 
 1. Install NeoForge + Create / 安装 NeoForge + Create
 2. Place `.jar` in `mods` folder / 将 `.jar` 放入 `mods`
-3. Launch! / 启动！
+3. Launch / 启动
 
 ---
 
-## 🌐 Links / 链接
+##  Changelog / 更新日志
+
+The full changelog now lives in **[`CHANGELOG.md`](https://github.com/y15173334444/create-schematic-compute/blob/main/CHANGELOG.md)** — one `<details>` block per release. / 
+完整变更日志已拆分至 **[`CHANGELOG.md`](https://github.com/y15173334444/create-schematic-compute/blob/main/CHANGELOG.md)** —— 每个版本一个 `<details>` 块。
+
+---
+
+##  Links / 链接
 
 - **GitHub**: [github.com/y15173334444/create-schematic-compute](https://github.com/y15173334444/create-schematic-compute)
 - **Modrinth**: [modrinth.com/mod/create-schematic-compute](https://modrinth.com/mod/create-schematic-compute)
 - **License / 许可证**: MIT © 2026 StarryNight_Luo
 
+---
+
 <p align="center">
-  <b>⭐ If you enjoy this mod, star us on GitHub! / 喜欢请在GitHub点⭐！</b><br>
-  <i>Unleash Create's potential with visual programming! / 用可视化编程释放机械动力的潜力！🚀</i>
+  <b> If you enjoy this mod, star us on GitHub! / 喜欢请在GitHub点！</b><br>
+  <i>Unleash Create's potential with visual programming! / 用可视化编程释放机械动力的潜力！</i>
 </p>
