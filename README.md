@@ -1,4 +1,4 @@
-# Create: Schematic Compute
+<h1 align="center"> Create: Schematic Compute </h1>
 
 <p align="center">
   <b> 12 Programmable Blocks · 101 Node Types · Formula Syntax Highlighting & Autocomplete · Multiplayer Collaboration</b><br>
