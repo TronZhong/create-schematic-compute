@@ -29,7 +29,7 @@
 
 ## Mod Detail / 模组详情
 
-- For a detailed explanation, see **[`mod-detail.md`](https://github.com/y15173334444/create-schematic-compute/blob/main/docs/mod-detail.md)**. / 详细讲解见 **[`mod-detail.md`](https://github.com/y15173334444/create-schematic-compute/blob/main/docs/mod-detail.md)**。
+- For a detailed explanation, see **[`mod-detail.md`](/docs/mod-detail.md)**. / 详细讲解见 **[`mod-detail.md`](/docs/mod-detail.md)**。
 
 
 
@@ -78,8 +78,8 @@ Yes — Private Signal I/O (named channels) or BUS_IN/BUS_OUT (banded). / 可以
 
 ##  Changelog / 更新日志
 
-The full changelog now lives in **[`CHANGELOG.md`](https://github.com/y15173334444/create-schematic-compute/blob/main/CHANGELOG.md)** — one `<details>` block per release. / 
-完整变更日志已拆分至 **[`CHANGELOG.md`](https://github.com/y15173334444/create-schematic-compute/blob/main/CHANGELOG.md)** —— 每个版本一个 `<details>` 块。
+The full changelog now lives in **[`CHANGELOG.md`](/CHANGELOG.md)** — one `<details>` block per release. / 
+完整变更日志已拆分至 **[`CHANGELOG.md`](/CHANGELOG.md)** —— 每个版本一个 `<details>` 块。
 
 ---
 
