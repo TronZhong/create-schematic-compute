@@ -351,7 +351,7 @@ joiners have no pending ops and always load the authoritative graph.
 | `SpeedProxyBlockEntity` | 转速代理 / Speed Proxy | Create SpeedController 直控 / Direct speed controller access |
 | `ProgramComputerBlockEntity` | 编程计算机 / Program Computer | 时序逻辑专用 / Sequential logic only |
 | `AmplifierComputerBlockEntity` | 功放电脑 / Amplifier Computer | 音频图宿主：MUSIC/AMP/AUDIO_OUT 求值 + 频段发布 + 传输表持久化（每 tick 剪除死节点条目）；双击 MUSIC 节点开 NBS 编辑器 / Audio graph host: evaluates MUSIC/AMP/AUDIO_OUT, publishes bands, persists transport state (pruned per tick); double-click a MUSIC node for the NBS editor |
-| `SpeakerBlockEntity` | 音响 / Speaker | 音频专用图宿主（默认图 `BUS_IN(band) --音频线--> SPEAKER_PLAY(ch)`，频段读取走 BUS_IN 音频分支）：SPEAKER_PLAY 经 `SpeakerSink` 交付本 tick 音符事件，`NoteEventPacket` 发追踪玩家；gain/radius/mute/红石静音（运行时门控不写回）/ Audio-only graph host (default graph `BUS_IN(band) --audio wire--> SPEAKER_PLAY(ch)`, band reads via the BUS_IN audio branch): SPEAKER_PLAY hands note events to the BE via `SpeakerSink`, shipped as `NoteEventPacket` to tracking players; gain/radius/mute settings with redstone as a runtime gate (never written back) |
+| `SpeakerBlockEntity` | 音响 / Speaker | 音频专用图宿主（图由玩家在编辑器里摆放，典型链路 `BUS_IN(band) --音频线--> SPEAKER_PLAY`，频段读取走 BUS_IN 音频分支；BE 不播种节点）：SPEAKER_PLAY 经 `SpeakerSink` 交付本 tick 音符事件，`NoteEventPacket` 发追踪玩家；gain/radius/mute/红石静音（运行时门控不写回）/ Audio-only graph host (player-authored graph, the usual chain being `BUS_IN(band) --audio wire--> SPEAKER_PLAY`; band reads via the BUS_IN audio branch; the BE seeds no nodes): SPEAKER_PLAY hands note events to the BE via `SpeakerSink`, shipped as `NoteEventPacket` to tracking players; gain/radius/mute settings with redstone as a runtime gate (never written back) |
 
 ### 动力组合线 BE / Kinetic composition-line BEs（v1.2.5+）
 

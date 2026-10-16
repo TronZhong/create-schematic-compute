@@ -189,7 +189,7 @@
 
 | Feature / 功能 | Description / 说明 |
 |----------------|-------------------|
-| 🔉 Dumb Terminal / 哑终端 | Default graph `BUS_IN --audio wire--> SPEAKER_PLAY` passes through identically; channel splitting belongs to the upstream CHANNEL / 默认图 `BUS_IN --音频线--> SPEAKER_PLAY` 恒等直通，声道拆分归上游 CHANNEL |
+| 🔉 Dumb Terminal / 哑终端 | Player-authored graph `BUS_IN --audio wire--> SPEAKER_PLAY` passes through identically; channel splitting belongs to the upstream CHANNEL / 图由玩家自己摆放（典型 `BUS_IN --音频线--> SPEAKER_PLAY`）恒等直通，声道拆分归上游 CHANNEL |
 | 🔊 World Playback / 世界发声 | Plays the subscribed band at its own position / 在自身坐标播放订阅频段 |
 | ⚙️ Playback Settings / 播放设置 | Gain (0-4) · audible radius (1-4096, default 48) · mute, in the editor panel / 编辑器面板设增益（0-4）、可听半径（1-4096，默认 48）、静音 |
 | 🔴 Redstone Mute / 红石静音 | Redstone high silences the speaker / 红石高电平静音 |
