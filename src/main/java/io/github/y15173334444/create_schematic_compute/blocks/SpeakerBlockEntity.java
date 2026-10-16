@@ -2,9 +2,7 @@ package io.github.y15173334444.create_schematic_compute.blocks;
 
 import io.github.y15173334444.create_schematic_compute.SchematicCompute;
 import io.github.y15173334444.create_schematic_compute.graph.AudioCurve;
-import io.github.y15173334444.create_schematic_compute.graph.GraphNode;
 import io.github.y15173334444.create_schematic_compute.graph.MusicTransport;
-import io.github.y15173334444.create_schematic_compute.graph.NodeType;
 import io.github.y15173334444.create_schematic_compute.graph.NoteEvent;
 import io.github.y15173334444.create_schematic_compute.graph.SpeakerSink;
 import io.github.y15173334444.create_schematic_compute.network.MusicStopPacket;
@@ -23,18 +21,18 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 音响 BE（R1-3）：<b>音频专用图宿主</b>（{@code SyncedGraphBlockEntity}），图 = {@code BUS_IN --音频线--> SPEAKER_PLAY}。
+ * 音响 BE（R1-3）：<b>音频专用图宿主</b>（{@code SyncedGraphBlockEntity}）——图完全由玩家在
+ * 编辑器里摆放（典型链路 {@code BUS_IN --音频线--> SPEAKER_PLAY}），BE 不播种任何节点。
  * <p>从音频频段读（band→音频 BUS_IN.signalName，经求值器 BUS_IN 音频分支读 AudioBands），
  * 经 {@code SPEAKER_PLAY} 在自身坐标发声
  * （实现 {@link SpeakerSink}）。增益/半径/静音为播放设置；红石高电平静音兜底。</p>
- * <p>Speaker BE: an audio-only graph host ({@code BUS_IN --audio wire--> SPEAKER_PLAY}) that reads an
- * audio band and plays at its own position via {@link SpeakerSink}.</p>
+ * <p>Speaker BE: an audio-only graph host ({@code SyncedGraphBlockEntity}) whose graph is authored
+ * entirely by the player in the editor (the usual chain being
+ * {@code BUS_IN --audio wire--> SPEAKER_PLAY}) — the BE seeds no nodes. It reads an audio band
+ * and plays at its own position via {@link SpeakerSink}.</p>
  */
 public class SpeakerBlockEntity extends SyncedGraphBlockEntity implements SpeakerSink {
 
-    /** 默认图初始频段名。运行时以图内 BUS_IN 的名字为准（编辑器可改、随节点 NBT 持久化）。
-     *  Initial band name for the default graph only — the graph's BUS_IN name rules at runtime. */
-    public String channelBand = "speaker";
     /** 播放增益（叠加在音源增益链上）。 */
     public float gain = 1f;
     /** 可听半径（格，1–4096，默认 48）。 / Audible radius in blocks (1-4096, default 48). */
@@ -58,15 +56,10 @@ public class SpeakerBlockEntity extends SyncedGraphBlockEntity implements Speake
         redstoneMuted = level.hasNeighborSignal(worldPosition);
         // 与 ProgramComputer/功放同款门控：运行开关关闭时不求值、不发声。
         if (!isRunning()) { onStopRunning(); return; }
-        // 默认图：BUS_IN(band) --音频线--> SPEAKER_PLAY(声道)（仅空图时建立；频段读取走
-        // BUS_IN 音频分支——输出接音频线即读 AudioBands，2026-10-03 起 AUDIO_IN 节点已移除）
-        if (graph().nodes.isEmpty()) createDefaultGraph();
-        // BUS_IN 的频段名归图所有（用户在编辑器里改、随节点 NBT 持久化）——旧版此处每 tick
-        // 把音频 BUS_IN 强制写回 channelBand 字段（默认图时代遗留），用户改名字总被重置为
-        // "speaker"。订阅哪个频段 = 图里那根总线输入的名字，BE 不再覆盖。
-        // BUS_IN band names belong to the graph (edited in the editor, persisted in node
-        // NBT) — the old per-tick re-point to the channelBand field was a default-graph-era
-        // leftover that kept resetting user edits.
+        // 图完全由玩家在编辑器里摆放，BE 不播种任何节点（旧「空图建默认图」是测试期遗留，
+        // 2026-10-11 移除）。订阅哪个频段 = 图里那根总线输入的名字。
+        // The graph is authored entirely by the player in the editor — the BE seeds no nodes
+        // (the old empty-graph default seeding was a test-era leftover, removed 2026-10-11).
         rs().checkGraphChanged(graph());
         if (graphChanged()) recompileEvaluatorFull();
         evaluator().setAudioTransports(audioTransports);
@@ -78,19 +71,6 @@ public class SpeakerBlockEntity extends SyncedGraphBlockEntity implements Speake
                 runtimeState().delayQueues, runtimeState().flipflopStates, runtimeState().pulseTimers);
         broadcastEvalSnapshot();
         broadcastFlipflopDiff();
-        setChanged();
-    }
-
-    /** 默认音频图：BUS_IN(band) --音频线--> SPEAKER_PLAY（恒等直通，2026-10-04 起无声道选择——
-     *  拆分归上游 CHANNEL，音响是哑终端）。单引脚多声道；频段读取由 BUS_IN 音频分支承担
-     * （signalBands ≥1 条保 bandCount≥1，音频引用才落到引脚 0）。 */
-    private void createDefaultGraph() {
-        GraphNode in = graph().addNode(NodeType.BUS_IN, 0, 0);
-        in.signalName = channelBand;
-        in.signalBands = new ArrayList<>(List.of(channelBand));
-        GraphNode play = graph().addNode(NodeType.SPEAKER_PLAY, 220, 0);
-        graph().addConnection(in.id, 0, play.id, 0); // pinId 自动派生（BUS 出 = 频段名）
-        graph().bumpGeneration();
         setChanged();
     }
 
@@ -135,28 +115,24 @@ public class SpeakerBlockEntity extends SyncedGraphBlockEntity implements Speake
             new ChunkPos(worldPosition), new MusicStopPacket(worldPosition));
     }
 
-    /** 应用设置（C2S 设置包）：gain/radius/mute 是 BE 播放设置；band 仅作空图默认图的初始
-     *  频段名（运行时频段名归图节点，编辑器里改），此处不再重写图。SPEAKER_PLAY 恒等直通
-     * （2026-10-04 起无声道参数——拆分归上游 CHANNEL）。
-     *  Apply settings (C2S packet): gain/radius/mute are BE playback settings; band only seeds
-     *  an empty graph's BUS_IN name (the runtime band name belongs to the graph node) — no
-     *  graph rewrite here. SPEAKER_PLAY passes through identically (no channel param since
-     *  2026-10-04 — splitting belongs to the upstream CHANNEL). */
-    public void applySettings(String band, float g, int rad, boolean m) {
-        this.channelBand = band == null ? "" : band;
+    /** 应用设置（C2S 设置包）：gain/radius/mute 是 BE 播放设置。图不在这里动——节点由玩家在
+     *  编辑器里摆放（旧「空图种默认图」是测试期遗留，2026-10-11 移除）。SPEAKER_PLAY 恒等直通
+     *  （2026-10-04 起无声道参数——拆分归上游 CHANNEL）。
+     *  Apply settings (C2S packet): gain/radius/mute are BE playback settings. The graph is left
+     *  alone here — nodes are authored by the player in the editor (the old empty-graph default
+     *  seeding was a test-era leftover, removed 2026-10-11). SPEAKER_PLAY passes through
+     *  identically (no channel param since 2026-10-04 — splitting belongs to the upstream
+     *  CHANNEL). */
+    public void applySettings(float g, int rad, boolean m) {
         this.gain = Math.max(0f, Math.min(4f, g));
         this.radius = Math.max(1, rad);
         this.mute = m;
-        if (level != null && !level.isClientSide() && graph().nodes.isEmpty()) {
-            createDefaultGraph();
-        }
         setChanged();
         if (level != null) level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
     }
 
     @Override
     protected void saveTypeSpecific(CompoundTag t, HolderLookup.Provider r) {
-        t.putString("band", channelBand);
         t.putFloat("gain", gain);
         t.putInt("radius", radius);
         t.putBoolean("mute", mute);
@@ -164,7 +140,6 @@ public class SpeakerBlockEntity extends SyncedGraphBlockEntity implements Speake
 
     @Override
     protected void loadTypeSpecific(CompoundTag t, HolderLookup.Provider r) {
-        if (t.contains("band")) channelBand = t.getString("band");
         if (t.contains("gain")) gain = t.getFloat("gain");
         if (t.contains("radius")) radius = t.getInt("radius");
         if (t.contains("mute")) mute = t.getBoolean("mute");
@@ -173,7 +148,6 @@ public class SpeakerBlockEntity extends SyncedGraphBlockEntity implements Speake
     @Override
     protected void acceptTypeSpecific(SyncedGraphBlockEntity src) {
         if (!(src instanceof SpeakerBlockEntity s)) return;
-        this.channelBand = s.channelBand;
         this.gain = s.gain;
         this.radius = s.radius;
         this.mute = s.mute;

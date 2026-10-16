@@ -16,16 +16,19 @@ import java.util.Map;
 
 /**
  * 音响图编辑器（R1-E）：{@code AbstractGraphScreen}，节点准入 = 音频专用（SPEAKER）。
- * 图 = {@code BUS_IN(频段) --音频线--> SPEAKER_PLAY(选声道)}；在编辑器里拖线、选频段/声道。
+ * 图由玩家自己摆放（典型链路 {@code BUS_IN(频段) --音频线--> SPEAKER_PLAY}，在编辑器里拖线、
+ * 给总线输入起频段名）；BE 不播种节点。
  * <p>第二行工具按钮（雷达同款）：「播放设置」开关 gain/radius/mute 面板——静音开关即时
  * 生效（随点随发），gain/radius 输入框无焦点时回显 BE 值、有焦点时实时写入，保存按钮
  * 钳位并发包，关面板也应用。面板配色走用户主题（NodeRenderer 调色函数）。
  * <p>Speaker graph editor: an {@link AbstractGraphScreen} with the audio-only SPEAKER
- * allowance. Drag {@code BUS_IN → SPEAKER_PLAY} and pick the band/channel. A second toolbar
- * row (radar-style) hosts the playback-settings toggle: gain/radius/mute — mute applies
- * immediately, the boxes mirror the BE when unfocused and write it live while focused, and
- * the save button clamps + ships {@link SpeakerSettingsPacket}. Panel colours follow the
- * user theme via the NodeRenderer accessors.
+ * allowance. The graph is player-authored (the usual chain being
+ * {@code BUS_IN(band) --audio wire--> SPEAKER_PLAY} — drag the wire and name the band in the
+ * editor); the BE seeds no nodes. A second toolbar row (radar-style) hosts the
+ * playback-settings toggle: gain/radius/mute — mute applies immediately, the boxes mirror the
+ * BE when unfocused and write it live while focused, and the save button clamps + ships
+ * {@link SpeakerSettingsPacket}. Panel colours follow the user theme via the NodeRenderer
+ * accessors.
  */
 public class SpeakerScreen extends AbstractGraphScreen {
 
@@ -148,11 +151,13 @@ public class SpeakerScreen extends AbstractGraphScreen {
     private void send(SpeakerBlockEntity be) {
         be.gain = Math.max(0f, Math.min(4f, be.gain));
         be.radius = Math.max(1, Math.min(4096, be.radius));
-        // band 仅作空图默认图种子；SPEAKER_PLAY 恒等直通（2026-10-04 起无声道参数）。
-        // The band only seeds an empty graph's default; SPEAKER_PLAY passes through
-        // identically (no channel param since 2026-10-04).
+        // 只发播放设置；图内节点由玩家自己摆放（BE 不再播种默认图）。SPEAKER_PLAY 恒等直通
+        // （2026-10-04 起无声道参数）。
+        // Playback settings only — the graph's nodes are authored by the player (the BE no
+        // longer seeds a default graph). SPEAKER_PLAY passes through identically (no channel
+        // param since 2026-10-04).
         PacketDistributor.sendToServer(new SpeakerSettingsPacket(
-            be.getBlockPos(), be.channelBand, be.gain, be.radius, be.mute));
+            be.getBlockPos(), be.gain, be.radius, be.mute));
     }
 
     // ── Clicks ──

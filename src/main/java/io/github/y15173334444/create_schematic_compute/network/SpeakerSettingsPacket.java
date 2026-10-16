@@ -13,12 +13,14 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
- * 音响设置（C→S）：频段名/增益/半径/静音。应用到 {@link SpeakerBlockEntity}。
- * band 仅作空图默认图的初始频段名（运行时频段名归图节点）。
- * <p>Speaker settings (client→server): band / gain / radius / mute. The band only seeds
- * the default graph's BUS_IN name — the runtime band name belongs to the graph node.</p>
+ * 音响设置（C→S）：增益/半径/静音。应用到 {@link SpeakerBlockEntity}。
+ * 图不在这里动——图内节点由玩家在编辑器里摆放（旧 band 字段随「空图种默认图」一并移除，
+ * 2026-10-11）。
+ * <p>Speaker settings (client→server): gain / radius / mute, applied to the
+ * {@link SpeakerBlockEntity}. The graph is untouched — its nodes are authored by the player in
+ * the editor (the old band field went with the empty-graph default seeding, removed 2026-10-11).</p>
  */
-public record SpeakerSettingsPacket(BlockPos pos, String band, float gain, int radius, boolean mute)
+public record SpeakerSettingsPacket(BlockPos pos, float gain, int radius, boolean mute)
         implements CustomPacketPayload {
 
     public static final CustomPacketPayload.Type<SpeakerSettingsPacket> TYPE =
@@ -26,7 +28,6 @@ public record SpeakerSettingsPacket(BlockPos pos, String band, float gain, int r
 
     public static final StreamCodec<RegistryFriendlyByteBuf, SpeakerSettingsPacket> CODEC = StreamCodec.composite(
         BlockPos.STREAM_CODEC, SpeakerSettingsPacket::pos,
-        ByteBufCodecs.STRING_UTF8, SpeakerSettingsPacket::band,
         ByteBufCodecs.FLOAT, SpeakerSettingsPacket::gain,
         ByteBufCodecs.VAR_INT, SpeakerSettingsPacket::radius,
         ByteBufCodecs.BOOL, SpeakerSettingsPacket::mute,
@@ -40,7 +41,7 @@ public record SpeakerSettingsPacket(BlockPos pos, String band, float gain, int r
             if (!(sp.level() instanceof ServerLevel sl)) return;
             if (!SablePacketHelper.isWithinReachableRange(sp, pos, 16384.0)) return;
             if (sl.getBlockEntity(pos) instanceof SpeakerBlockEntity be) {
-                be.applySettings(band, gain, radius, mute);
+                be.applySettings(gain, radius, mute);
             }
         });
     }
