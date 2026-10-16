@@ -175,12 +175,12 @@ public class SchematicCompute {
                     output.accept(SPEED_PROXY_ITEM.get());
                     output.accept(TRANSMISSION_ITEM.get());
                     output.accept(CNC_GEARBOX_ITEM.get());
+                    output.accept(KINETIC_GAUGE_ITEM.get());
                     output.accept(PROGRAM_ITEM.get());
                     output.accept(CONTROL_SEAT_ITEM.get());
                     output.accept(SENSOR_ITEM.get());
                     output.accept(MONITOR_ITEM.get());
                     output.accept(RADAR_ITEM.get());
-                    output.accept(KINETIC_GAUGE_ITEM.get());
                     output.accept(AMPLIFIER_COMPUTER_ITEM.get());
                     output.accept(SPEAKER_ITEM.get());
                     output.accept(PORTABLE_TERMINAL.get());

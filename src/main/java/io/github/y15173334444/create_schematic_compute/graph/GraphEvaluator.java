@@ -86,6 +86,18 @@ public class GraphEvaluator {
     private final java.util.Map<Long, AudioRef> audioRefs = new java.util.HashMap<>();
     private static long audioKey(int nodeId, int pin) { return ((long) nodeId << 16) | (pin & 0xFFFF); }
 
+    /** 取本刻某节点音频输出的引用（{@link #evaluate} 返回后有效，只在当刻有意义）。
+     *  观察者用途：宿主 BE 读自己 MUSIC 节点展开的音符（如功放电脑的频谱取数）——拉取式，
+     *  不像 sink 那样介入音频通路，读不读都不影响求值结果。
+     *  This tick's audio-out reference of a node (valid right after {@link #evaluate}, for that
+     *  tick only). Observer use: a host BE reads its own MUSIC node's expanded notes (e.g. the
+     *  amplifier computer's spectrum tap) — pull-based, never in the audio path, so reading (or
+     *  not) cannot change the evaluation result. */
+    public AudioRef audioOut(int nodeId, int pin) {
+        AudioRef r = audioRefs.get(audioKey(nodeId, pin));
+        return r == null ? AudioRef.EMPTY : r;
+    }
+
     /** 音频频段消费者身份（宿主坐标 + 节点 id）：AudioBands 的 exactly-once 游标按它去重
      *  （跨 BE tick 顺序翻转时同批发布防重播）。 */
     private String consumerKey(GraphNode node) {
