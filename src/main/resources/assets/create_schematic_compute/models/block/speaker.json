@@ -1,1 +1,90 @@
-{ "parent": "minecraft:block/cube_all", "textures": { "all": "minecraft:block/note_block" } }
+{
+	"format_version": "1.9.0",
+	"texture_size": [
+		32,
+		32
+	],
+	"textures": {
+		"0": "create_schematic_compute:block/speaker",
+		"particle": "create_schematic_compute:block/speaker"
+	},
+	"elements": [
+		{
+			"from": [
+				3,
+				0,
+				3
+			],
+			"to": [
+				13,
+				14,
+				13
+			],
+			"rotation": {
+				"angle": 0,
+				"axis": "y",
+				"origin": [
+					3,
+					0,
+					3
+				]
+			},
+			"faces": {
+				"north": {
+					"uv": [
+						0,
+						0,
+						5,
+						7
+					],
+					"texture": "#0"
+				},
+				"east": {
+					"uv": [
+						5,
+						0,
+						10,
+						7
+					],
+					"texture": "#0"
+				},
+				"south": {
+					"uv": [
+						0,
+						7,
+						5,
+						14
+					],
+					"texture": "#0"
+				},
+				"west": {
+					"uv": [
+						5,
+						7,
+						10,
+						14
+					],
+					"texture": "#0"
+				},
+				"up": {
+					"uv": [
+						10,
+						0,
+						15,
+						5
+					],
+					"texture": "#0"
+				},
+				"down": {
+					"uv": [
+						10,
+						5,
+						15,
+						10
+					],
+					"texture": "#0"
+				}
+			}
+		}
+	]
+}

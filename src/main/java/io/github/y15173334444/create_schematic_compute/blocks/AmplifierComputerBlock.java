@@ -41,7 +41,24 @@ public class AmplifierComputerBlock extends BaseEntityBlock implements IWrenchab
     public static final MapCodec<AmplifierComputerBlock> CODEC = simpleCodec(AmplifierComputerBlock::new);
     public static final BooleanProperty LIT = BooleanProperty.create("lit");
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
-    protected static final VoxelShape SHAPE = Block.box(1, 0, 1, 15, 15, 15);
+    /** 碰撞体 = 底座静态体（机箱 Y0–3 + 键盘面 Y3–4 + 蓝件），X/Z 满幅 0–16。
+     *  与朝向、开合都**刻意无关**：底座四向对称；开合不进碰撞，免得图启停时把站在机器上的
+     *  实体顶起来。顶面 0.25 格 → 玩家自动上台阶走到机器上，开盖的盖子当装饰穿人。
+     *  Collision = the static base slab (chassis + keyboard deck + brackets), full 0–16
+     *  footprint, independent of facing AND of LIT on purpose: the base is four-way
+     *  symmetric, and keeping the lid out of collision avoids shoving entities that stand
+     *  on the machine when the graph starts/stops. A 0.25-block top lets players step up
+     *  onto it; the open lid is decoration and is walked through. */
+    private static final VoxelShape COLLISION = Block.box(0.0, 0.0, 0.0, 16.0, 4.0, 16.0);
+
+    /** 轮廓 / 瞄准靶 = 整机包络（单盒、与朝向无关）：底座 + 开盖盖子（旋转后 AABB 到 Y13.24 / Z16.75）。
+     *  **必须含盖子区域** —— 屏幕长在盖子上，而玩家瞄准/右击走的是 {@code getShape}
+     *  （{@code ClipContext.Block.OUTLINE}）：只给底座会让点屏幕点不到方块、GUI 打不开。
+     *  Outline / aim target = the whole-machine envelope (single box, facing-independent):
+     *  base plus the open lid's rotated AABB. It MUST cover the lid — the screen lives on it
+     *  and block targeting runs through {@code getShape}; a base-only shape would leave the
+     *  screen unclickable and the GUI unopenable. */
+    private static final VoxelShape OUTLINE = Block.box(0.0, 0.0, 0.0, 16.0, 13.25, 16.75);
 
     public AmplifierComputerBlock(Properties p) {
         super(p);
@@ -59,7 +76,8 @@ public class AmplifierComputerBlock extends BaseEntityBlock implements IWrenchab
         return createTickerHelper(t, SchematicCompute.AMPLIFIER_COMPUTER_BE.get(), (lv, p, st, be) -> be.tick());
     }
     @Override protected RenderShape getRenderShape(BlockState s) { return RenderShape.MODEL; }
-    @Override protected VoxelShape getShape(BlockState s, BlockGetter l, BlockPos p, CollisionContext c) { return SHAPE; }
+    @Override protected VoxelShape getShape(BlockState s, BlockGetter l, BlockPos p, CollisionContext c) { return OUTLINE; }
+    @Override protected VoxelShape getCollisionShape(BlockState s, BlockGetter l, BlockPos p, CollisionContext c) { return COLLISION; }
     @Override
     protected InteractionResult useWithoutItem(BlockState s, Level l, BlockPos p, Player pl, BlockHitResult h) {
         if (l.isClientSide()) {

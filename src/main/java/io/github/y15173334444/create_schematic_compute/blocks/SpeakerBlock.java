@@ -38,7 +38,12 @@ import java.util.List;
 public class SpeakerBlock extends BaseEntityBlock implements IWrenchable {
     public static final MapCodec<SpeakerBlock> CODEC = simpleCodec(SpeakerBlock::new);
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
-    protected static final VoxelShape SHAPE = Block.box(2, 0, 2, 14, 14, 14);
+    /** 碰撞与轮廓都取模型本体（模型 X/Z 3–13、Y 0–14 的那一个盒子）。
+     *  改自早先的 2–14：那圈比模型大 1px，玩家贴不到箱体表面。
+     *  Collision and outline both follow the model box (X/Z 3–13, Y 0–14); the earlier
+     *  2–14 box was 1px wider than the art on every side, so players could not touch the
+     *  cabinet surface. */
+    protected static final VoxelShape SHAPE = Block.box(3, 0, 3, 13, 14, 13);
 
     public SpeakerBlock(Properties p) {
         super(p);

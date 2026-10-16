@@ -208,6 +208,11 @@ public class SchematicCompute {
                     KINETIC_GAUGE_BE.get(),
                     io.github.y15173334444.create_schematic_compute.client.renderer.KineticGaugeRenderer::new
                 );
+                // 功放电脑屏幕：开盖时在盖子内侧画频谱柱（数据由 BE 每刻下发）
+                net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(
+                    AMPLIFIER_COMPUTER_BE.get(),
+                    io.github.y15173334444.create_schematic_compute.client.renderer.AmplifierComputerRenderer::new
+                );
             });
         });
 
