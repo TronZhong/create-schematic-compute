@@ -240,6 +240,29 @@ public class SchematicCompute {
                 io.github.y15173334444.create_schematic_compute.blocks.GraphEditor.clearTempView();
             });
 
+        // 新追踪玩家补首帧求值快照：广播已改「内容变化才发」，追踪开始那帧没有每刻兜底可搭——
+        // 在 ChunkWatch 上给该玩家补发当前快照，仪表/显示器加载即有值。只补**运行中**的宿主：
+        // 停机宿主的缓存是停机前的旧值，不该当作现值下发。
+        // Eval-snapshot backfill on chunk tracking: the broadcast is send-on-change now, so the
+        // tracking-start frame has no per-tick fallback to ride — ship the current snapshot to
+        // that player so gauges/monitors show values the moment they load. Only **running**
+        // hosts qualify: a stopped host's cache is its pre-stop residue, not current values.
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(
+            net.neoforged.neoforge.event.level.ChunkWatchEvent.Watch.class, event -> {
+                for (var be : event.getChunk().getBlockEntities().values()) {
+                    if (!(be instanceof io.github.y15173334444.create_schematic_compute.blocks.GraphBlockEntity gbe))
+                        continue;
+                    if (!gbe.isRunning()) continue;
+                    var snap = gbe.getCachedEvalSnapshot();
+                    if (snap == null || snap == io.github.y15173334444.create_schematic_compute.graph.EvalSnapshot.EMPTY)
+                        continue;
+                    net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(event.getPlayer(),
+                        new io.github.y15173334444.create_schematic_compute.network.ClientboundGraphEvalPacket(
+                            be.getBlockPos(), snap.outputs(), snap.debugTimes(),
+                            snap.subOutputs(), snap.subDebugTimes(), snap.formulaSpreads()));
+                }
+            });
+
         // 每 tick 预算复位 — FORMULA 预算池单点复位(去重表清空 + deadline + yield 计数轮转)
         // Per-tick budget reset — single-point reset of the FORMULA budget pool (dedup clear + deadline + yield rotation)
         net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(

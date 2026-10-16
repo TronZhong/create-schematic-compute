@@ -72,6 +72,42 @@ public record EvalSnapshot(Map<Integer, float[]> outputs, Map<Integer, Float> de
         return formulaSpreads.getOrDefault(nodeId, 0f);
     }
 
+    /** 语义内容深度比较（「变化才发」门控用）：逐条比较五个映射，float[] 按元素。
+     *  <b>不是</b> record 的 equals——Map.equals 对 float[] 是引用相等，拿它当门控每刻都会
+     *  判「变了」。null 对端 = 未发过（判变化）。
+     *  Deep semantic comparison (for send-on-change gates): entry-by-entry over the five maps,
+     *  element-by-element for float[]. NOT the record's equals — Map.equals compares float[]s by
+     *  reference, which would read as "changed" on every tick. A null peer means "nothing sent
+     *  yet" and counts as changed. */
+    public boolean sameContent(EvalSnapshot o) {
+        if (o == this) return true;
+        if (o == null) return false;
+        return mapsEqual(outputs, o.outputs)
+            && debugTimes.equals(o.debugTimes)
+            && subMapsEqual(subOutputs, o.subOutputs)
+            && subDebugTimes.equals(o.subDebugTimes)
+            && formulaSpreads.equals(o.formulaSpreads);
+    }
+
+    private static boolean mapsEqual(Map<Integer, float[]> a, Map<Integer, float[]> b) {
+        if (a.size() != b.size()) return false;
+        for (var e : a.entrySet()) {
+            float[] bv = b.get(e.getKey());
+            if (bv == null || !java.util.Arrays.equals(e.getValue(), bv)) return false;
+        }
+        return true;
+    }
+
+    private static boolean subMapsEqual(Map<Integer, Map<Integer, float[]>> a,
+                                        Map<Integer, Map<Integer, float[]>> b) {
+        if (a.size() != b.size()) return false;
+        for (var e : a.entrySet()) {
+            Map<Integer, float[]> inner = b.get(e.getKey());
+            if (inner == null || !mapsEqual(e.getValue(), inner)) return false;
+        }
+        return true;
+    }
+
     /** 输出映射的不可修改视图。 / Unmodifiable view of the output map. */
     @Override
     public Map<Integer, float[]> outputs() {

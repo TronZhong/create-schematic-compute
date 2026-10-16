@@ -79,6 +79,9 @@ public class GraphHost {
     private final Set<String> lastBusOutKeys = new HashSet<>();
     /** 服务端权威求值快照（客户端渲染读取）。 / Server-authoritative eval snapshot (client rendering). */
     public volatile EvalSnapshot cachedEvalSnapshot = EvalSnapshot.EMPTY;
+    /** 上次下发的求值快照（「变化才发」门控基线，服务端宿主生命周期）。
+     *  Last shipped eval snapshot (the send-on-change baseline; server host lifetime). */
+    private EvalSnapshot lastSentEvalSnapshot;
     /** 首次 tick 注册 BUS 守卫。 / First-tick BUS registration guard. */
     private boolean busRegistrationPending = true;
     /** 客户端：图已从服务端加载。 / Client: graph loaded from server. */
@@ -440,11 +443,21 @@ public class GraphHost {
 
     // ── 快照广播 / snapshot broadcast ──
 
-    /** 向追踪客户端广播求值快照。 / Broadcast eval snapshot to tracking clients. */
+    /** 向追踪客户端广播求值快照——<b>内容变化才发</b>（flipflop 差分同款）：求值快照是节点值
+     *  数据面，每刻重发不变内容正是「暂停时总线数据面反复刷新」的来源。新追踪玩家的首帧由
+     *  ChunkWatch 补发（SchematicCompute），不由每刻广播兜底。
+     *  Broadcast the eval snapshot to tracking players — <b>only when its content changed</b>
+     *  (same discipline as the flipflop diff). Reshipping unchanged values every tick is what
+     *  kept the bus data plane "refreshing" while playback was paused; a newly tracking player
+     *  gets their first frame from the ChunkWatch backfill (SchematicCompute) instead of riding
+     *  a per-tick broadcast. */
     public void broadcastEvalSnapshot() {
         if (lvl() instanceof ServerLevel sl && evaluator != null) {
             evaluator.saveDebugTimes(runtimeState);
             var snapshot = evaluator.captureSnapshot();
+            cachedEvalSnapshot = snapshot;
+            if (snapshot.sameContent(lastSentEvalSnapshot)) return;
+            lastSentEvalSnapshot = snapshot;
             PacketDistributor.sendToPlayersTrackingChunk(sl, new ChunkPos(pos()),
                 new ClientboundGraphEvalPacket(pos(), snapshot.outputs(), snapshot.debugTimes(),
                     snapshot.subOutputs(), snapshot.subDebugTimes(), snapshot.formulaSpreads()));
