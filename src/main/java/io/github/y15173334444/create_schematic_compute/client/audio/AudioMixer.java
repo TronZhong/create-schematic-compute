@@ -310,41 +310,33 @@ public final class AudioMixer {
     }
 
     /**
-     * 落点帧（纯函数），按音符的下发时机分两种状态：
-     * <ul>
-     *   <li><b>提前下发</b>（delaySeconds ≥ 预播，稳态常规）：落点 = base + 墙钟增量 +
-     *       （delaySeconds − 预播 − 迟到）——音符在目标前一个预播窗口发出，客户端等到点；</li>
-     *   <li><b>按时下发</b>（delaySeconds &lt; 预播，传输起播/跳转后的第一批）：窗口内来不及
-     *       提前，音符本来就「到点才发」——落点 = base + 墙钟增量 + （delaySeconds − 迟到），
-     *       <b>不减预播</b>。若仍按稳态公式减预播，这批音符的落点会落到过去、被混音器钳到
-     *       同一帧——起播后前一个预播窗口的整段音乐挤成一瞬（「开头没了」）。分支以
-     *       delaySeconds ≷ 预播无缝衔接（= 时两式同值）。</li>
-     * </ul>
-     * delaySeconds 自<b>下发时刻</b>起算——到达迟到（lateSeconds）必须扣除，否则迟到 1:1 转成
-     * 播出推迟，积压段与后续段重叠（「积压音频挤在一起」）。
-     * <p>Placement frame (pure), two regimes by dispatch timing:
-     * <ul>
-     *   <li><b>Dispatched early</b> (delaySeconds ≥ pre-roll, the steady state): base + wall
-     *       advance + (delaySeconds − pre-roll − lateness) — the note arrives a window early
-     *       and waits for its frame;</li>
-     *   <li><b>Dispatched on time</b> (delaySeconds &lt; pre-roll, the first batch after a
-     *       transport start/seek — there was no window to dispatch early): base + wall advance
-     *       + (delaySeconds − lateness), <b>no pre-roll subtraction</b>. Applying the steady
-     *       formula here lands those notes in the past; the mixer clamps them onto one frame
-     *       and the whole first window plays as a single instant ("the song's opening is
-     *       gone"). The branches meet seamlessly at delaySeconds = pre-roll.</li>
-     * </ul>
-     * {@code delaySeconds} is measured from <b>dispatch</b>; arrival lateness must be
-     * subtracted.</p>
+     * 落点帧（纯函数）：{@code base + 墙钟增量 + delaySeconds − 迟到}——<b>一条时间轴，不分分支</b>。
+     * {@code delaySeconds} 自下发时刻到音符目标（乐理秒），落点就是目标时刻本身；预播提前量是
+     * <b>服务端的下发提前量</b>（客户端拿到手等着到点），不能从落点里再扣——扣了全员抢跑一个
+     * 预播窗。到达迟到（lateSeconds）必须扣除，否则迟到 1:1 转成播出推迟，积压段与后续段重叠
+     * （「积压音频挤在一起」）。
+     * <p>历史（别再走回去）：曾按 {@code delaySeconds ≷ 预播} 分两支——稳态减预播、起播/跳转后
+     * 第一批不减。两支在边界相差整整一个预播窗（所谓「无缝衔接」的旧钉测只断言了稳态一侧），
+     * 起播第一批恰横跨边界：后一个窗的音乐提前压在开头上同拍双响（「起播头两秒重音」）。首批
+     * 不减那支本身是「开头被吃」（减预播后落点为负、混音器钳成一瞬）的修复，断轴是它的副作用；
+     * 单式同时满足两者——首批 delay ∈ [0, 预播] 落在未来保排程错位，稳态自然衔接。
+     * <p>Placement frame (pure): {@code base + wall advance + delaySeconds − lateness} — <b>one
+     * time axis, no branches</b>. {@code delaySeconds} is the musical time from dispatch to the
+     * note's target, so the placement is the target itself; the pre-roll is <b>server-side
+     * dispatch lead</b> (the client holds the notes and waits) and must not be subtracted again —
+     * subtracting it plays everything one window early. Arrival lateness is subtracted so a late
+     * packet plays at its musical position instead of dragging the backlog 1:1. History (do not
+     * regress): a two-branch formula (steady subtracted, first batch after a start/seek did not)
+     * split the axis by a full pre-roll at the boundary — the first batch straddles that boundary,
+     * so the next window of music piled onto the opening two hits per beat. The unbranched form
+     * keeps both properties the branches were reaching for: the first batch lands in the future
+     * with its stagger intact, and the steady stream meets it seamlessly.
      */
     public static long placementFrames(long baseFrames, long wallAdvanceFrames,
-                                       float delaySeconds, float lateSeconds, float prerollSeconds) {
+                                       float delaySeconds, float lateSeconds) {
         long lateFrames = Math.round(Math.max(0f, lateSeconds) * SAMPLE_RATE);
-        float targetOffset = (delaySeconds >= prerollSeconds)
-            ? delaySeconds - prerollSeconds
-            : delaySeconds;
         return baseFrames + wallAdvanceFrames
-            + Math.round(targetOffset * SAMPLE_RATE)
+            + Math.round(delaySeconds * SAMPLE_RATE)
             - lateFrames;
     }
 }

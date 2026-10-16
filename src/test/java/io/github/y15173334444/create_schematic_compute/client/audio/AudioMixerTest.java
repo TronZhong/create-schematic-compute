@@ -205,29 +205,34 @@ class AudioMixerTest {
     @Test
     void placementFramesSubtractsArrivalLateness() {
         int rate = AudioMixer.SAMPLE_RATE;
-        // 准点：base 1000 + 墙钟增量 2205 + (0.25 − 0.2)s = 1000 + 2205 + 2205
-        long onTime = AudioMixer.placementFrames(1000, 2205, 0.25f, 0f, 0.2f);
-        assertEquals(1000 + 2205 + Math.round(0.05f * rate), onTime, 2);
+        // 准点：base 1000 + 墙钟增量 2205 + 0.25s（落点 = 目标时刻本身，不扣预播）
+        long onTime = AudioMixer.placementFrames(1000, 2205, 0.25f, 0f);
+        assertEquals(1000 + 2205 + Math.round(0.25f * rate), onTime, 2);
         // 迟到 0.4 s：落点提前 0.4s——播出回到乐理位置（不与后续段重叠）
-        long late = AudioMixer.placementFrames(1000, 2205, 0.25f, 0.4f, 0.2f);
+        long late = AudioMixer.placementFrames(1000, 2205, 0.25f, 0.4f);
         assertEquals(onTime - Math.round(0.4f * rate), late, 2, "lateness is subtracted from placement");
     }
 
     @Test
     void placementFramesKeepsStaggerForOnTimeDispatch() {
         int rate = AudioMixer.SAMPLE_RATE;
-        // 起播/跳转后的第一批：delaySeconds < 预播 → 不减预播，按 delay 排帧——
-        // 若按稳态公式减预播，这批落点全为负、被混音器钳到同一帧（「开头没了」）。
-        // First batch after a start/seek (delaySeconds < pre-roll): no pre-roll subtraction,
-        // so the batch keeps its intra-batch stagger instead of clamping onto one frame.
-        long first = AudioMixer.placementFrames(1000, 2205, 0.1f, 0f, 2.0f);
-        long second = AudioMixer.placementFrames(1000, 2205, 1.7f, 0f, 2.0f);
+        // 起播/跳转后的第一批（delay < 预播）：按 delay 排帧，保住批内错位——
+        // 旧「减预播」式会让这批落点全为负、被混音器钳到同一帧（「开头没了」）。
+        // The first batch after a start/seek (delay < pre-roll): placed by delay, keeping the
+        // intra-batch stagger instead of clamping onto one frame.
+        long first = AudioMixer.placementFrames(1000, 2205, 0.1f, 0f);
+        long second = AudioMixer.placementFrames(1000, 2205, 1.7f, 0f);
         assertEquals(1000 + 2205 + Math.round(0.1f * rate), first, 2);
         assertEquals(first + Math.round(1.6f * rate), second, 2,
-            "on-time dispatch keeps musical distance between notes");
-        // 边界无缝：delay == 预播时两式同值
-        long boundary = AudioMixer.placementFrames(1000, 2205, 2.0f, 0f, 2.0f);
-        assertEquals(1000 + 2205, boundary, 2);
+            "first batch keeps musical distance between notes");
+        // 旧双分支边界（delay ≈ 预播）两侧同轴：相差 2 ms 的 delay 只能差 2 ms 的落点——
+        // 旧两支式在此差整整一个预播窗（起播双响的根因）。
+        // Both sides of the old branch boundary (delay ≈ pre-roll) share one axis: a 2 ms
+        // delay difference may only shift placement by 2 ms.
+        long below = AudioMixer.placementFrames(1000, 2205, 1.999f, 0f);
+        long above = AudioMixer.placementFrames(1000, 2205, 2.001f, 0f);
+        assertEquals(Math.round(0.002f * rate), above - below, 2,
+            "pre-roll boundary must not split the time axis");
     }
 
     @Test

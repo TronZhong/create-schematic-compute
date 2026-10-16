@@ -172,23 +172,25 @@ public final class CscAudioEngine {
     private static long ms(double v) { return (long) (v * 1_000_000); }
 
     /**
-     * 目标绝对输出帧 = 锚点帧 + 距锚点墙钟增量 + （目标时刻 − 预播）。
+     * 目标绝对输出帧 = 锚点帧 + 距锚点墙钟增量 + delaySeconds − 迟到（{@link
+     * AudioMixer#placementFrames}，单时间轴——预播是服务端下发提前量，不从落点再扣）。
      * 锚点对（帧, 时刻）必须**成对**取用：混音渲染与调度共锁，若基准帧取「当前游标」而墙钟取
      * 「锚点时刻」，等待渲染锁的批次会吃进已完成渲染的步进（每批整体后移 1 块、块数随撞锁次数
      * 漂移）——「密集段落推迟/挤堆」的根因。绝对帧坐标与锁获取时刻彻底解耦。
-     * <p>Target absolute frame = anchor frames + wall delta + (target − pre-roll). The anchor
-     * pair (frames, wall) must be read <b>atomically</b>: mixing renders and scheduling share a
-     * lock, and a base frame read after lock acquisition (with a wall time from before) absorbs
-     * completed renders — shifting whole batches late by a buffer, drifting with lock collisions.
-     * Absolute-frame placement is fully decoupled from lock timing.</p>
+     * <p>Target absolute frame = anchor frames + wall delta + delaySeconds − lateness (one time
+     * axis — the pre-roll is server-side dispatch lead and is not subtracted from placement).
+     * The anchor pair (frames, wall) must be read <b>atomically</b>: mixing renders and
+     * scheduling share a lock, and a base frame read after lock acquisition (with a wall time
+     * from before) absorbs completed renders — shifting whole batches late by a buffer,
+     * drifting with lock collisions. Absolute-frame placement is fully decoupled from lock
+     * timing.</p>
      */
     private static long targetFrameFor(NoteEvent e, float lateSeconds) {
         synchronized (ANCHOR_LOCK) {
             long wallAdvance = Math.max(0, System.nanoTime() - anchorWallNanos);
             return AudioMixer.placementFrames(anchorFrames,
                 Math.round(wallAdvance * framesPerNano),
-                e.delaySeconds(), lateSeconds,
-                io.github.y15173334444.create_schematic_compute.graph.MusicTransport.PREROLL_SECONDS);
+                e.delaySeconds(), lateSeconds);
         }
     }
 
