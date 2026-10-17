@@ -26,8 +26,7 @@
 - [Multiplayer Collaboration / 多人协作](#multiplayer-collaboration--多人协作v124)
 - [Formula Script Node / 公式脚本节点](#formula-script-node--公式脚本节点)
 - [BUS System / BUS 总线系统](#bus-system--bus-总线系统)
-- [Node Reference / 节点参考](#node-reference--节点参考101-
-)
+- [Node Reference / 节点参考](#node-reference--节点参考101-)
 - [Controls / 操作指南](#controls--操作指南)
 - [Sable Physics Integration / Sable 物理集成](#sable-physics-integration--sable-物理集成)
 - [Schematic Support / 蓝图兼容](#schematic-support--蓝图兼容)
