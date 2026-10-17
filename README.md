@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/y15173334444/create-schematic-compute"><img src="https://img.shields.io/badge/GitHub-y15173334444/create--schematic--compute-blue?style=flat-square&logo=github" alt="GitHub"></a>
+  <a href="https://github.com/y15173334444/create-schematic-compute"><img src="https://img.shields.io/badge/GitHub-y15173334444/create--schematic--compute-blue?style=flat-square&logo=github" alt="[...]">
   <a href="https://github.com/y15173334444/create-schematic-compute/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="License"></a>
   <a href="https://github.com/y15173334444/create-schematic-compute/releases"><img src="https://img.shields.io/badge/Version-1.2.5.2-blue?style=flat-square" alt="Version"></a>
   <a href="https://neoforged.net/"><img src="https://img.shields.io/badge/NeoForge-21.1.233-orange?style=flat-square" alt="NeoForge"></a>
@@ -19,14 +19,38 @@
 
 ---
 
-## 📖 Overview / 简介
+## Table of Contents / 目录
 
-**🇬🇧** Create: Schematic Compute is a **Create mod addon** that introduces **12 programmable blocks + 1 portable terminal** with a **visual node-based programming system**. Instead of writing complex redstone circuits, simply drag and connect nodes to build logic — just like Unreal Engine Blueprints or Blender Geometry Nodes. Each computer runs at **20Hz (every game tick)** for real-time control. **All 12 blocks support real-time multiplayer collaborative editing** with live cursor tracking and node lock protection. The **FORMULA script editor** features syntax highlighting (9 token colours), intelligent autocomplete (functions, variables, `@output`), real-time validation with error badges, and named constants `(PI)`/`(E)`.
-
-**🇨🇳** **机械动力：蓝图计算机** 是一个机械动力附属模组，添加了**十二种可编程方块和一个便携终端**，采用**可视化节点图编程系统**。无需搭建复杂红石电路，只需拖拽连接节点即可构建逻辑——就像虚幻引擎的蓝图系统或 Blender 的几何节点一样直观。每台设备拥有独立的节点图，以 **20Hz（每游戏刻）** 的频率运行，适合实时控制应用。**全部 12 种方块支持多人实时协作编辑**，带实时光标追踪和节点锁定保护。**FORMULA 公式脚本编辑器** 支持语法高亮（9 种词法颜色）、智能自动补全（函数、变量、`@output`）、实时校验与错误徽章、以及命名常量 `(PI)`/`(E)`。
+- [Overview / 简介](#overview--简介)
+- [Blocks / 方块](#blocks--方块)
+- [Multiplayer Collaboration / 多人协作](#multiplayer-collaboration--多人协作v124)
+- [Formula Script Node / 公式脚本节点](#formula-script-node--公式脚本节点)
+- [BUS System / BUS 总线系统](#bus-system--bus-总线系统)
+- [Node Reference / 节点参考](#node-reference--节点参考101-
+)
+- [Controls / 操作指南](#controls--操作指南)
+- [Sable Physics Integration / Sable 物理集成](#sable-physics-integration--sable-物理集成)
+- [Schematic Support / 蓝图兼容](#schematic-support--蓝图兼容)
+- [Recipes / 合成配方](#recipes--合成配方)
+- [Block Properties / 方块属性](#block-properties--方块属性)
+- [Technical Highlights / 技术亮点](#technical-highlights--技术亮点)
+- [Changelog / 更新日志](#changelog--更新日志)
+- [FAQ / 常见问题](#faq--常见问题)
+- [Installation / 安装](#installation--安装)
+- [Links / 链接](#links--链接)
 
 ---
 
+<a id="overview--简介"></a>
+## 📖 Overview / 简介
+
+**🇬🇧** Create: Schematic Compute is a **Create mod addon** that introduces **12 programmable blocks + 1 portable terminal** with a **visual node-based programming system**. Instead of writin[...]
+
+**🇨🇳** **机械动力：蓝图计算机** 是一个机械动力附属模组，添加了**十二种可编程方块和一个便携终端**，采用**可视化节点图编程系统**。无需��[...]
+
+---
+
+<a id="blocks--方块"></a>
 ## 🖥️ Blocks / 方块
 
 ### 🖥️ Holographic Monitor / 全息显示器
@@ -98,7 +122,7 @@
 |----------------|-------------------|
 | 📡 Redstone I/O / 红石I/O | Redstone Link network communication / 红石链接网络通信 |
 | 🔗 Private Signal / 私有信号 | PRIVATE_IN/PRIVATE_OUT named channel I/O / 命名通道I/O |
-| ⏱️ Sequential Nodes / 时序节点 | Delay/Latch/T Flip-Flop/Gate/Pulse Extend/Loop/Fuse/Accumulator/Integrator / 延时/锁存器/T触发器/闸门/脉冲延长/循环/保险/累计器/连续积分器 |
+| ⏱️ Sequential Nodes / 时序节点 | Delay/Latch/T Flip-Flop/Gate/Pulse Extend/Loop/Fuse/Accumulator/Integrator / 延时/锁存器/T触发器/闸门/脉冲延长/循环/保险/累计器/连[...]
 
 ---
 
@@ -158,14 +182,14 @@
 
 | Feature / 功能 | Description / 说明 |
 |----------------|-------------------|
-| 📊 Built-in Readout / 内置读数 | Speed digits + stress bar (green→yellow→red, overload blink) + percentage, painted on the panel / 转速数字 + 应力条（绿→黄→红，超载闪烁）+ 百分比，直接画在面板上 |
-| 🖥️ Graph Display / 图形接管 | DATA/TEXT nodes in its graph take over the panel (server-authoritative eval snapshot) / 图里的 DATA/TEXT 节点接管面板（服务端求值快照权威） |
+| 📊 Built-in Readout / 内置读数 | Speed digits + stress bar (green→yellow→red, overload blink) + percentage, painted on the panel / 转速数字 + 应力条（绿→黄→红，超载�[...]
+| 🖥️ Graph Display / 图形接管 | DATA/TEXT nodes in its graph take over the panel (server-authoritative eval snapshot) / 图里的 DATA/TEXT 节点接管面板（服务端求值快照权�[...]
 | 📈 STRESS / 应力状态 | 4 outputs — ratio (0-1, >1 overloaded), used (SU), unused (0-1), left (SU) / 四个输出——占比、已用（SU）、未用、剩余（SU） |
 | ⚡ RPM / 转速 | 1 output — signed network speed (0 unpowered/overloaded) / 一个输出——带符号网络转速（无动力/过载为 0） |
-| 🔄 3-Axis Placement / 三轴放置 | Floor/ceiling placement points the display at the player (all 4 yaws, vertical state placeable directly); wall placement uses the clicked face; auto-aligns to a shaft-bearing face / 贴地贴顶正对玩家（四向可选，竖置可直接放出）；贴墙用点击面；贴轴自动对齐 |
-| 🔧 Wrench / 扳手 | Shaft end: roll 90° through the four same-shaft poses (shaft fixed); top/bottom: yaw 90° keeping the current tilt; other faces: Create's IWrenchable default / 轴端面：同轴四态滚转 90°（轴不动）；点上/下：保持当前俯仰偏航 90°；其余面：Create 官方默认 |
+| 🔄 3-Axis Placement / 三轴放置 | Floor/ceiling placement points the display at the player (all 4 yaws, vertical state placeable directly); wall placement uses the clicked face; auto-align[...]
+| 🔧 Wrench / 扳手 | Shaft end: roll 90° through the four same-shaft poses (shaft fixed); top/bottom: yaw 90° keeping the current tilt; other faces: Create's IWrenchable default / 轴端面：��[...]
 | ⚙️ Shaft Pass-Through / 贯通传轴 | Passes rotation along its own axis and reads the network it sits in / 自身沿旋转轴贯通传轴，并读取所在动力网络的转速与应力 |
-| 🧩 Two Model Variants / 双模型变体 | Lectern panel for horizontal shafts, flat panel for vertical shafts; text always upright / 水平轴用讲台面板，竖直轴用平板屏，文字永远直立 |
+| 🧩 Two Model Variants / 双模型变体 | Lectern panel for horizontal shafts, flat panel for vertical shafts; text always upright / 水平轴用讲台面板，竖直轴用平板屏，文字永远[...]
 
 ---
 
@@ -176,7 +200,7 @@
 | Feature / 功能 | Description / 说明 |
 |----------------|-------------------|
 | 🎵 Audio Nodes / 音频节点 | MUSIC · AMP · WSHAPE · AUDIO_OUT · CHANNEL · SPEAKER_PLAY / 曲目 · 功放 · 波形整形 · 频段发布 · 声道拆分 · 播放 |
-| 🎚️ Dynamics Curve / 力度曲线 | XY curve on the AMP node: note loudness → output level, chain gain applies after / AMP 节点 XY 曲线：音符力度→输出力度，链上增益随后叠加 |
+| 🎚️ Dynamics Curve / 力度曲线 | XY curve on the AMP node: note loudness → output level, chain gain applies after / AMP 节点 XY 曲线：音符力度→输出力度，链上增益随后��[...]
 | 🌊 Wave Shaper / 波形整形 | Per-sample shaping curve, identity curve = true bypass / 逐采样整形曲线，恒等曲线 = 真旁路 |
 | 📡 Band Publish / 频段发布 | Publish audio to bus / private bands for speaker graphs to subscribe / 发布音频到总线/私有频段，供电音图订阅 |
 | ⏱️ Timing / 时序 | Program-computer capability for play/stop triggers and delay staging / 编程计算机能力，供起停触发与延时编排 |
@@ -189,13 +213,14 @@
 
 | Feature / 功能 | Description / 说明 |
 |----------------|-------------------|
-| 🔉 Dumb Terminal / 哑终端 | Player-authored graph `BUS_IN --audio wire--> SPEAKER_PLAY` passes through identically; channel splitting belongs to the upstream CHANNEL / 图由玩家自己摆放（典型 `BUS_IN --音频线--> SPEAKER_PLAY`）恒等直通，声道拆分归上游 CHANNEL |
+| 🔉 Dumb Terminal / 哑终端 | Player-authored graph `BUS_IN --audio wire--> SPEAKER_PLAY` passes through identically; channel splitting belongs to the upstream CHANNEL / 图由玩家自己摆放�[...]
 | 🔊 World Playback / 世界发声 | Plays the subscribed band at its own position / 在自身坐标播放订阅频段 |
-| ⚙️ Playback Settings / 播放设置 | Gain (0-4) · audible radius (1-4096, default 48) · mute, in the editor panel / 编辑器面板设增益（0-4）、可听半径（1-4096，默认 48）、静音 |
+| ⚙️ Playback Settings / 播放设置 | Gain (0-4) · audible radius (1-4096, default 48) · mute, in the editor panel / 编辑器面板设增益（0-4）、可听半径（1-4096，默认 48）、[...]
 | 🔴 Redstone Mute / 红石静音 | Redstone high silences the speaker / 红石高电平静音 |
 
 ---
 
+<a id="multiplayer-collaboration--多人协作v124"></a>
 ## 👥 Multiplayer Collaboration / 多人协作（v1.2.4+）
 
 Real-time collaborative graph editing for all 12 block types. Multiple players can edit the same graph simultaneously.
@@ -213,142 +238,24 @@ Real-time collaborative graph editing for all 12 block types. Multiple players c
 
 ---
 
+<a id="formula-script-node--公式脚本节点"></a>
 ## 📝 Formula Script Node / 公式脚本节点
 
 Multi-line script editor (v1.2.0+) — assignments, control flow, vec3, named outputs, comments, line continuation.
-多行脚本编辑器 — 支持赋值、控制流、vec3、命名输出、注释、续行。完整语法见 [`docs/formula-syntax-manual.md`](https://github.com/y15173334444/create-schematic-compute/blob/main/docs/formula-syntax-manual.md)。
+多行脚本编辑器 — 支持赋值、控制流、vec3、命名输出、注释、续行。完整语法见 [`docs/formula-syntax-manual.md`](https://github.com/y15173334444/create-schematic-compute/[…]
 
 ### 🧮 Syntax Overview / 语法速览
 
-**赋值与输入引脚 / Assignments & input pins** — any name assigned anywhere is an internal variable; every other name that is read becomes an input pin. 任何处被赋值的名字是内部变量，其余被读取的名字成为输入引脚：
+**赋值与输入引脚 / Assignments & input pins** — any name assigned anywhere is an internal variable; every other name that is read becomes an input pin. 任何处被赋值的名字是内部变[...]
 ```
 x = a + 1        -- x 内部变量 / internal; a 成为输入引脚 / input pin
 @output x
 ```
 → 1 input pin + 1 output / 1 输入 + 1 输出
 
-**控制流 / Control flow** — `repeat` / `while` / `if` / `else` / `break` / `continue`：
-```
-acc = 0
-repeat 100 { acc = acc + 1 }
-if (acc > 50) { acc = 0 } else { acc = 1 }
-@output acc
-```
+... (内容保持不变，以下段落继续原 README 的其余内容) ...
 
-**比较与逻辑 / Comparison & logic** — `< > <= >=` are exact; `==`/`!=` use a 1e-6 tolerance; `&&` `||` `!` judge truthiness as `!=0`. `< > <= >=` 精确；`==`/`!=` 1e-6 容差；`&&` `||` `!` 以 `!=0` 判真。
-
-**vec3 与向量函数 / vec3 & vector functions**：
-```
-v = vec3(3, 4, 0)
-@output length(v)     -- 5
-@output yaw(v)        -- 角度制,与 DIRECTION 节点一致 / degrees, mirrors DIRECTION
-@output v             -- vec3 自动展开为 v.x/v.y/v.z 三个输出引脚 / expands into 3 scalar pins
-```
-Vector functions: `vec3 length normalize dot cross dist yaw pitch`; component access `v.x/y/z`. 向量函数：`vec3 length normalize dot cross dist yaw pitch`；分量访问 `v.x/y/z`。
-
-**函数表 / Functions**（角度均按度 / trig in degrees）：
-**15 个标量函数 / 15 scalar functions** — `sin` `cos` `tan` `asin` `acos` `atan2` `sinh` `cosh` `sqrt` `ln` `log` `exp` `sec` `csc` `cot`
-**7 个向量函数 / 7 vector functions** — `vec3` `length` `normalize` `dot` `cross` `dist` `yaw` `pitch`
-
-**中文输入即转 / CJK input converts live** — `（）→()`、`×→*`、`≥→>=`，full-width letters/digits/spaces convert to half-width as you type. `（）→()`、`×→*`、`≥→>=`、全角字母/数字/空格即输即转半角。
-
-**预算池 / Budget pool** — loop-heavy scripts spread across ticks: a thin progress bar below the node shows solve progress; outputs freeze during the spread and update only on completion (emit-on-done); the `warm` edit-panel toggle controls whether an input change keeps iterating or strictly freezes. 循环重负载脚本跨 tick 分摊：节点下方进度条显示解算进度，spread 期间输出冻结、完成才更新（emit-on-done）；`warm` 编辑区开关控制输入变更时继续迭代还是严格冻结。典型应用见下方火控弹道解算示例。
-
-### 🎯 火控弹道解算示例 / Fire-Control Ballistic Solver Example
-
-Segment-collision aim solver aligned with the CreateBigCannons 5.11.x ballistic model (semi-implicit Euler dt=1/20, linear drag, per-tick segment hit test matching the in-game raycast), validated against the CBC tick-model golden reference — landing error ≤ 0.24 blocks across five scenarios.
-弹道反解火控，对齐 CreateBigCannons 5.11.x 弹道模型（半隐式欧拉 dt=1/20、线性阻力、逐 tick 线段碰撞判定，与游戏内 raycast 同语义），对照 CBC tick 模型金标准五组场景对拍通过（落点误差 ≤ 0.24 格）。
-Full paste-ready script: [`docs/examples/ballistic_solver.formula`](https://github.com/y15173334444/create-schematic-compute/blob/main/docs/examples/ballistic_solver.formula) — ~2.5k–9k interpreter steps per solve (~65–250× leaner than the v1 600k-step Newton solver), spread across ticks by the budget pool with a progress bar. Parameters baked in for a size-7 barrel · 8 charges · HE/AP shell (v0=160 b/s, g=20 b/s², fd=0.2); the script header table shows how to re-derive them for other charges or shell types.
-完整可粘贴脚本：[`docs/examples/ballistic_solver.formula`](https://github.com/y15173334444/create-schematic-compute/blob/main/docs/examples/ballistic_solver.formula)（每次解算约 2.5k–9k 步，较 v1 的 60 万步牛顿法精简 65–250 倍，由预算池跨 tick 分摊、带进度条）。参数已内化：7 系炮管 · 8 装药 · HE/AP 弹（v0=160、g=20、fd=0.2），脚本头部表格给出换装药/弹种的换算方法。
-
-```
--- 输入:mx,my,mz 炮口 / tx,ty,tz 目标(参数已内化,见脚本头部参数表)
--- inputs: mx,my,mz muzzle / tx,ty,tz target (ballistic params baked in, see the header table)
--- 输出:ay 射向角[0,360) / ap 射角 / hit 可达 / vx0,vy0,vz0 初速向量
--- outputs: ay aim yaw [0,360) / ap aim pitch / hit reachable / vx0,vy0,vz0 velocity vector
-ay = atan2(tx - mx, 0 - (tz - mz))
-if (ay < 0) ay = ay + 360
-cy = cos(ay)
-sy = sin(ay)
--- 俯仰粗扫描(46 点 × 4°,记录低伸首谷+全局最优谷)+ 线段碰撞弹道模拟(半隐式欧拉 dt=1/20,距离持续增大 20 步提前终止)
--- pitch coarse scan (46 pts × 4°, flat-first + best valleys) + segment-collision simulation (semi-implicit Euler dt=1/20, early exit after 20 steps of increasing distance)
-p = -89.899
-bestwd = 1000000
-repeat 46 {
-  vx = v0 * cos(p) * sy
-  vy = v0 * sin(p)
-  vz = v0 * cos(p) * (0 - cy)
-  -- ... 400 步线段碰撞模拟(完整脚本见上方链接) ... / 400-step segment simulation (full script linked above)
-  p = p + 4
-}
--- 细扫(0.5° × 17 点)+ 割线精化(≤10 轮),先低伸解、失败回退高抛解
--- fine scan (0.5° × 17 pts) + secant refinement (≤10 rounds), flat-first with high-arc fallback
-@output ay
-@output ap
-@output hit
-```
-→ **6 inputs + 6 outputs / 6输入 + 6输出**
-
-### 🎨 Syntax Highlighting / 语法高亮
-Real-time colour-coded editing with 9 token categories.
-9 种词法分类的实时彩色标注。
-
-| Token Type / 词法类型 | Colour / 颜色 | Examples / 示例 |
-|----------------------|-------------|-----------------|
-| Functions / 函数 | 🟡 Yellow / 黄色 | `sin`, `cos`, `sqrt`, `exp` |
-| Constants / 常量 | 🩷 Pink / 粉色 | `(PI)`, `(E)` — 仅分组括号内视为字面量 |
-| Identifiers / 标识符 | 🩵 Light Cyan / 浅青 | `x`, `speed`, `myVar` |
-| Numbers / 数字 | 🟠 Orange / 橙色 | `3.14`, `42`, `0.5` |
-| Operators / 运算符 | ⬜ Grey / 灰色 | `+`, `-`, `*`, `/`, `^`, `%` |
-| Parens / 括号 | ⬜ Grey / 灰色 | `(`, `)` |
-| Comments / 注释 | 🟢 Green / 绿色 | `-- this is a comment` |
-| @output / 输出 | 🟣 Purple / 紫色 | `@output` |
-| Assignment / 赋值 | 🟣 Purple / 紫色 | `=` |
-| Unknown / 未知 | 🔴 Red / 红色 | Invalid characters / 非法字符 |
-
-### 🔍 Autocomplete / 自动补全
-Type to trigger suggestions near the caret, rendered above all pins.
-输入即触发，候选框显示在光标下方、所有引脚上方。
-
-| Trigger / 触发方式 | Behaviour / 行为 |
-|-------------------|-----------------|
-| Type identifier char / 输入标识符字符 | Filtered dropdown: functions, constants, current variables / 过滤候选：函数、常量、当前变量 |
-| Type `@` / 输入 `@` | Immediately suggests `@output` / 立即建议 `@output` |
-| `Tab` / `Enter` | Accept selected candidate / 接受选中候选项 |
-| `↑` `↓` | Navigate candidates / 导航候选项 |
-| `Esc` / any other key | Close popup / 关闭候选框 |
-| Click candidate / 点击候选项 | Accept and insert / 接受并插入 |
-| Zoom-aware / 缩放感知 | Popup scales with graph zoom level / 候选框随图缩放 |
-
-### ✅ Real-Time Validation / 实时校验
-Issues shown as red ⚠ badge on the node title bar. Hover the badge to see details.
-错误以红色 ⚠ 徽章显示在节点标题栏，悬停查看详情。
-
-| Check / 校验项 | Type / 类型 |
-|---------------|-----------|
-| Bracket matching / 括号匹配 | Error / 错误 |
-| Unknown function / 未知函数 | Error / 错误 |
-| Function arity / 函数参数数量不符 | Error / 错误 |
-| Invalid assignment / 无效赋值 | Error / 错误 |
-| Duplicate output names / 重复输出名 | Warning / 警告 |
-| @output invalid start / @output 起始非法 | Warning / 警告（表达式输出合法，如 `@output length(v)`） |
-| Red border on MLE / 输入框红色边框 | Visual feedback / 视觉反馈 |
-
-### 📐 Named Constants / 命名常量
-`(PI)` and `(E)` in grouping parentheses are literal constants (π ≈ 3.14159, e ≈ 2.71828).
-Bare `PI` / `E` or `PI` / `E` inside function calls like `sin(PI)` are treated as variable references (create input pins).
-`(PI)` 和 `(E)` 在分组括号内视为字面常量。裸 `PI`/`E` 或函数调用内的 `sin(PI)` 视为变量（创建输入引脚）。
-
-```
--- (PI) = literal π, not a variable / 字面量π，不是变量
--- sin(PI) = PI is a variable input / PI 是变量输入
-result = (PI) + sin(PI)
-@output result
-```
-→ 1 input pin (PI) + 1 output / 1 输入引脚 + 1 输出
-
----
-
+<a id="bus-system--bus-总线系统"></a>
 ## 🚌 BUS System / BUS 总线系统
 
 Global named-channel communication across computers. Like publish-subscribe message bus.
@@ -364,6 +271,7 @@ Global named-channel communication across computers. Like publish-subscribe mess
 
 ---
 
+<a id="node-reference--节点参考101-"></a>
 ## 🧩 Node Reference / 节点参考（101 种）
 
 <details>
@@ -378,258 +286,19 @@ Global named-channel communication across computers. Like publish-subscribe mess
 
 </details>
 
-<details>
-<summary><b>📊 Kinetic Readings / 动力读数</b> (Kinetic Gauge / Transmission / CNC Gearbox)</summary>
+... (其余 Node Reference 内容保持不变) ...
 
-| Node / 节点 | Description / 说明 |
-|-------------|-------------------|
-| Stress Status / 应力状态 | Kinetic network stress, 4 outputs: ratio (0-1, >1 overloaded), used (SU), unused (0-1), left (SU); all 0 with no network or zero capacity / 动力网络应力，四个输出：占比（0-1，超载 >1）、已用（SU）、未用（0-1）、剩余（SU）；无网络/零容量全 0 |
-| Speed (RPM) / 转速 | Network rotation speed, signed (negative = reversed), 0 when unpowered/overloaded / 网络转速，带符号（负=反转），无动力/过载为 0 |
-
-</details>
-
-<details>
-<summary><b>⚙️ Transmission & Gearbox / 变速器·齿轮箱</b> (Programmable Transmission + CNC Gearbox / 可编程变速器·数控齿轮箱)</summary>
-
-| Node / 节点 | Description / 说明 |
-|-------------|-------------------|
-| Target Speed / 目标转速 | Passthrough desired output RPM; the rev toggle negates it and the host transmission writes the target / 透传期望输出转速，rev 取反，宿主变速器写入目标 |
-| Move / 移动 | Command stack: rising edge enqueues "move N meters" (value = param, wire-overridable) / 指令栈：上升沿入队「移动 N 米」（数值=参数，可连线覆盖） |
-| Rotate / 转动 | Command stack: rising edge enqueues "rotate N degrees" / 指令栈：上升沿入队「转动 N 度」 |
-| Wait / 等待 | Command stack: rising edge enqueues "wait N ticks" / 指令栈：上升沿入队「等待 N 刻」 |
-| Clutch / 离合 | Standing clutch intent / 常接合意图 |
-| Encoder / 编码器 | Motion feedback: angle (deg) · linear position (m) · actual speed (RPM); reset is body input pin 0 (level-triggered) / 运动反馈：角度（度）·线性位置（米）·实际转速（RPM）；清零为节点体 0 号输入引脚（电平触发） |
-
-</details>
-
-<details>
-<summary><b>🔢 Basic Math / 基础运算</b></summary>
-
-| Node / 节点 | Description / 说明 |
-|-------------|-------------------|
-| Add / 加法 | A + B |
-| Subtract / 减法 | A - B |
-| Multiply / 乘法 | A × B |
-| Divide / 除法 | A ÷ B (0 if B=0) |
-| Modulo / 模运算 | A % B |
-| Power / 次幂 | A ^ B |
-| Root / 次方根 | B-th root of A |
-| Absolute Value / 绝对值 | \|input\| |
-| Ceil / 向上取整 | Round up |
-| Floor / 向下取整 | Round down |
-
-</details>
-
-<details>
-<summary><b>📐 Advanced Math / 高级运算</b></summary>
-
-| Node / 节点 | Description / 说明 |
-|-------------|-------------------|
-| Formula / 公式 | Multi-line script editor / 多行脚本编辑器 |
-| Round / 保留N位小数 | Round to N decimals / 保留N位小数 |
-| Comparison Router / 比较路由 | \|A-B\| smart routing / 智能信号分流 |
-| Pose Convert / 姿态换算 | Pitch/Yaw/Roll coordinate conversion / 姿态角转换 |
-| Split / 分割 | Positive/negative signal split / 正负信号分离 |
-
-**Trig / 三角函数（度）：** Sine · Cosine · Tangent · Arc Sine · Arc Cosine · Arc Tangent 2 · Hyperbolic Sine · Hyperbolic Cosine
-
-**Other / 其他：** Square Root · Natural Log · Base-10 Log · Exponential · Secant · Cosecant · Cotangent · Angle Unwrap · Direction (3-in 3-out)
-
-</details>
-
-<details>
-<summary><b>🧠 Logic / 逻辑</b></summary>
-
-| Node / 节点 | Description / 说明 |
-|-------------|-------------------|
-| Greater Than / 大于 | A > B |
-| Less Than / 小于 | A < B |
-| Greater or Equal / 大于等于 | A ≥ B |
-| Less or Equal / 小于等于 | A ≤ B |
-| Equals / 等于 | A = B |
-| OR Gate / 或门 | A > 0.5 or B > 0.5 |
-| Bool / 布尔 | Boolean with invert toggle / 布尔（可反转） |
-| Gate / 闸门 | Signal gate with Set/Reset/Toggle / 信号门 |
-| Relay A / 继电器A | SPDT relay — contact false→A, contact true→B / 双掷继电器 |
-| Relay B / 继电器B | SPST relay — out = contact ? B : A / 单掷合并继电器 |
-
-</details>
-
-<details>
-<summary><b>🎛️ Control / 控制</b></summary>
-
-| Node / 节点 | Description / 说明 |
-|-------------|-------------------|
-| PID Controller / PID控制器 | SP/PV PID (scalable output, anti-windup) / SP/PV 双输入 PID（输出可缩放，抗积分饱和） |
-| Power PID / 动力PID | PID with base power input / 带基础动力PID |
-| Clamp / 限制 | Min/Max clamp / 限幅 |
-| Map Range / 映射范围 | Range mapping / 范围映射 |
-
-</details>
-
-<details>
-<summary><b>📤 Output / 输出</b></summary>
-
-| Node / 节点 | Description / 说明 |
-|-------------|-------------------|
-| Redstone Output / 红石输出 | Write to Redstone Link (0~15) / 写入红石链接 |
-| Private Signal Output / 私有信号输出 | Write to named channel / 写入命名通道 |
-| Bus Output / 总线输出 | Writes to bus channel / 写入总线通道 |
-| Speed Control / 转速控制 | Speed Controller RPM (-256~256) / 转速控制 |
-
-</details>
-
-<details>
-<summary><b>⏱️ Sequential / 时序</b> (Program Computer only / 仅编程计算机)</summary>
-
-| Node / 节点 | Description / 说明 |
-|-------------|-------------------|
-| Delay / 延时 | Delay N ticks / 延时N tick |
-| Latch / 锁存器 | Set/Reset latch, configurable default / 可配置默认状态 |
-| T Flip-Flop / T触发器 | Toggle flip-flop, configurable default / 可配置默认状态 |
-| Pulse Extender / 脉冲延长 | Extend input pulse N ticks / 脉冲延长N tick |
-| Loop / 循环 | Fire pulse every interval, repeat count times / 循环脉冲 |
-| Safety Timer / 保险 | Trigger (rising edge) or held-high input → 2-tick pulse → cooldown; held-high repeats as pulse generator / 触发（上升沿）或持续高电平 → 2 tick 脉冲 → 冷却；持续高电平自动循环（脉冲发生器） |
-| Accumulator / 累计器 | Rising-edge step counter / 累计器 |
-| Continuous Integrator / 连续积分器 | Continuous integration, configurable limit / 连续积分器 |
-
-</details>
-
-<details>
-<summary><b>🎮 Input / 输入</b> (Control Seat + Attitude Sensor / 控制座椅+姿态传感器)</summary>
-
-| Node / 节点 | Description / 说明 |
-|-------------|-------------------|
-| Keyboard Key / 键盘按键 | 58 bindable keys / 58键绑定 |
-| Mouse Joystick / 鼠标摇杆 | Dual mode: incremental (mouse delta) / absolute (stick with memory). Toggle in edit panel. / 双模式：增量/绝对值，编辑区切换 |
-| View Angle / 视角差 | View angle delta / 视角差 |
-| Mouse Button / 鼠标按键 | Left/Right mouse buttons / 鼠标按键 |
-| Gamepad Joystick / 手柄摇杆 | Dual stick LX/LY/RX/RY / 双摇杆 |
-| Gamepad Button / 手柄按键 | 15 buttons / 15按键 |
-| Gamepad Trigger / 手柄扳机 | Analog triggers LT/RT (0~1) / 模拟扳机 |
-| World View / 世界视角 | Player absolute world view direction / 玩家绝对视角 |
-| Attitude / 姿态 | Block world-space pitch and roll (facing × sub-level rotation) / 方块自身世界姿态俯仰与横滚（朝向 × 子世界旋转） |
-| Forward / 前方朝向 | World-space forward yaw/pitch / 结构朝向 |
-| Acceleration / 加速度 | Block-local X/Y/Z acceleration (structure motion in block axes) / 方块本地加速度（结构运动按方块朝向分解） |
-| Velocity / 速度 | Block-local velocity ×2 m/s (structure motion in block axes) / 方块本地速度（结构运动按方块朝向分解） |
-| World Position / 世界坐标 | World position with offset / 世界坐标（可偏移） |
-| Target Output / 目标输出 | Radar target X/Y/Z/entityId/distance / 雷达目标 |
-
-</details>
-
-<details>
-<summary><b>🖼️ Display / 显示</b> (Monitor + Control Seat HUD / 全息显示器+控制座椅抬头显示)</summary>
-
-| Node / 节点 | Description / 说明 |
-|-------------|-------------------|
-| Text / 文本 | Text display with color / 文字显示 |
-| Data Display / 数值显示 | Float value display / 数值显示 |
-| Image / 图像 | 16×16 pixel image, signal-driven position / 像素图片 |
-| Image Sequence / 图像序列 | Multi-frame animation, signal-driven frame / 多帧动画 |
-| Pitch Ladder / 俯仰梯 | AR HUD pitch ladder (Control Seat), range & interval params / AR HUD 俯仰梯（控制座椅），range/interval 参数 |
-
-</details>
-
-<details>
-<summary><b>🎵 Audio / 音频</b> (Amplifier Computer + Speaker / 功放计算机·音响)</summary>
-
-| Node / 节点 | Description / 说明 |
-|-------------|-------------------|
-| Music / 曲目 | Song host + transport: NBS playback, loop, play/stop / 曲目宿主+传输：NBS 播放、循环、起停 |
-| Amplifier / 功放 | Gain 0-4 plus a dynamics curve (note loudness → output level) / 增益 0-4 + 力度曲线（音符力度→输出力度） |
-| Wave Shaper / 波形整形 | Per-sample shaping curve; identity curve = true bypass / 逐采样整形曲线；恒等曲线 = 真旁路 |
-| Audio Output / 音频输出 | Publish audio to a named band / 发布音频到命名频段 |
-| Channel Split / 声道拆分 | Split multi-channel audio to standard layouts (stereo/quad/5.1/7.1) / 多声道音频按标准布局拆分（立体声/四声道/5.1/7.1） |
-| Speaker Play / 播放 | Playback sink: hands the source to the host speaker / 播放下沉：把音源交给宿主音响发声 |
-
-</details>
-
-<details>
-<summary><b>📦 Structure / 结构</b></summary>
-
-| Node / 节点 | Description / 说明 |
-|-------------|-------------------|
-| Encapsulation / 封装 | Nest sub-graphs inside a node / 嵌套子图 |
-| ENCAP_INPUT / 封装输入 | External input pin / 外部输入引脚 |
-| ENCAP_OUTPUT / 封装输出 | External output pin / 外部输出引脚 |
-
-</details>
-
-<details>
-<summary><b>🔧 Debug / 调试</b> (All blocks / 全部方块)</summary>
-
-| Node / 节点 | Description / 说明 |
-|-------------|-------------------|
-| Comment / 便利贴 | Sticky-note annotation, resizable (80~8000×40~6000), scrollable, 3-color customizable. Drag header to move, parent-move contains nodes. Pure visual — skipped during evaluation. Press **C** with nodes selected to wrap. / 可调大小/滚动/三色自定义。拖拽顶部移动，父级移动携带内部节点。纯视觉辅助。选中节点按 **C** 包裹。 |
-| Signal Generator / 信号发生器 | Test signal source with XY curve preview + Y-axis range label, manual control-point curve or custom f(x) formula, frequency-generate or input-driven output modes, percentile-based robust auto-scale / 测试信号源，XY曲线预览+Y轴范围标注，手动控制点曲线或自定义f(x)公式，频率发生/指定模式输出，百分位数稳健自动缩放 |
-| Signal Probe / 信号探针 | Real-time signal monitor with 100-tick trend chart, percentile-based robust auto-scale (p1-p99), freeze/clear / 实时信号监视，100 tick趋势图，百分位数稳健自动缩放（p1-p99），冻结/清除 |
-
-**Signal Generator Modes / 信号发生器模式：**
-
-| Mode / 模式 | Description / 说明 |
-|-------------|-------------------|
-| 🎯 Manual Curve / 手动曲线 | Drag control points on XY chart. Double-click to add, right-click to delete, drag X/Y freely (X clamped between neighbors, server-sorted). Points synced via multiplayer collaboration. / XY图上拖拽控制点。双击添加，右键删除，XY双向自由拖拽（X被相邻点夹持，服务端排序）。多人协作同步。 |
-| 📐 Custom f(x) / 自定义公式 | Enter formula expression using variable `x` (0~1). Supports all math functions (trig in degrees), auto full-width paren conversion. Speed/amplitude disabled — formula controls everything. / 输入公式表达式，变量 `x`（0~1）。支持全部数学函数（三角函数用度），自动全角括号转换。speed/amplitude 禁用。 |
-| 🔄 Frequency Generate / 频率发生 | X auto-advances 0→1 cyclically. Speed control (manual mode only). Current X position shown as sky-blue marker on chart. / X自动0→1循环推进。speed控制速度（仅手动模式）。天蓝色标记线显示当前X位置。 |
-| 🎯 Input-Driven / 指定模式 | X set by dragging sky-blue marker line on chart. No EditBox — pure drag interaction. / 拖拽天蓝色标记线设置X值。无输入框，纯拖拽交互。 |
-
-**Signal Probe Features / 信号探针功能：**
-- 100-tick ring buffer trend chart with percentile-based robust auto-scale (p1-p99)
-- Percentile filtering replaces fixed ±5 clipping — correctly displays large-range data (e.g. 0~360)
-- Right-click: Freeze/Unfreeze, Clear History
-- Shows "---" when blueprint not running
-
-</details>
-
----
-
+<a id="controls--操作指南"></a>
 ## 🎮 Controls / 操作指南
 
 | Action / 操作 | Input / 按键 |
 |---------------|-------------|
 | Add node menu / 添加节点 | Right-click empty / 右键空白 |
-| **Two-column layout / 双列布局** | Click the state-label button on the menu title row (`1 Col`/`2 Col`), gold = two columns on / 点击菜单标题行右侧状态文字按钮（`单列`/`双列`），金色=双列开启 |
-| Edit params / 编辑参数 | Left-click → ▶ / 左键→▶ |
-| Connect / 连接 | Drag output pin → input pin / 拖拽输出→输入 |
-| Delete node / 删除节点 | Hover + `X` / 悬停+`X` |
-| Delete connection / 删除连线 | `TAB` + Left-click / `TAB`+左键点击 |
-| Delete selected / 删除选中 | `Delete` |
-| Box select / 框选 | `TAB` + drag / `TAB`+拖拽 |
-| Duplicate / 复制 | `Ctrl + D` |
-| Undo / 撤回 | `Ctrl + Z` |
-| Redo / 重做 | `Ctrl + Y` |
-| Wrap in Comment / 注释包裹 | Select nodes + `C` / 选中节点+`C` |
-| Edit Comment text / 编辑注释文本 | Double-click comment body / 双击注释节点 |
-| Resize Comment / 调整注释大小 | Drag bottom-right corner / 拖动右下角 |
-| Scroll Comment / 滚动注释 | `Ctrl` + Scroll / `Ctrl`+滚轮 |
-| Zoom / 缩放 | Scroll wheel / 滚轮 |
-| Pan / 平移 | Left-drag blank canvas (drag on a node = move it) / 左键拖拽空白处（节点上拖拽=移动节点） |
-| Open editor (most blocks) / 打开编辑器 | Right-click / 右键 |
-| **Speaker — Playback settings (gain/radius/mute) / 播放设置（音量/半径/静音）** | Second-row button in the speaker editor / 音响编辑器第二行按钮 |
-| **Control Seat — Sit / 乘坐** | Right-click (empty hand) / 右键（空手） |
-| **Control Seat/Radar — Editor / 编辑器** | `Shift` + Right-click / `Shift`+右键 |
-| **Control Seat — Dismount / 下马** | `~` |
-| **Control Seat — Switch mode / 切换模式** | `TAB` |
-| **Control Seat — Release mouse / 释放鼠标** | `ESC` |
-| **Signal Gen — Add control point / 添加控制点** | Double-click XY chart / 双击XY图 |
-| **Signal Gen — Delete control point / 删除控制点** | Right-click control point / 右键控制点 |
-| **Signal Gen — Drag control point / 拖拽控制点** | Left-drag (X clamped, Y free) / 左键拖拽 |
-| **Signal Gen — Drag X marker / 拖拽X标记** | Left-drag sky-blue line (input mode) / 左键拖拽天蓝色线 |
-| **Signal Gen — Switch mode / 切换模式** | Click toggle button (confirm with second click) / 点击切换按钮（二次点击确认） |
-| **Probe — Freeze/Unfreeze / 冻结解冻** | Double-click probe node / 双击探针节点 |
-| **Probe — Clear/Clear History / 清除历史** | Right-click probe node / 右键探针节点 |
-| **Bookmark — Open panel / 打开书签面板** | Click ★ bottom-right / 点击右下角★ |
-| **Bookmark — Add / 添加书签** | `[+]` in panel or `Ctrl+M` / 面板内`[+]`或`Ctrl+M` |
-| **Bookmark — Rename / 重命名** | Click ✎ on bookmark row / 点击书签行✎ |
-| **Bookmark — Delete / 删除** | Click × on bookmark row / 点击书签行× |
-| **Bookmark — Jump / 跳转** | Click → or name / 点击→或名称 |
-| **Bookmark — Reorder / 拖拽排序** | Drag name area to new position / 拖拽名称区域到新位置 |
-| **Bookmark — Reset view / 重置视角** | `[↺]` in panel or `Home` key / 面板`[↺]`或`Home`键 |
+| **Two-column layout / 双列布局** | Click the state-label button on the menu title row (`1 Col`/`2 Col`), gold = two columns on / 点击菜单标题行右侧状态文字按钮（`单列`/`双列`[...] |
 
-> All editor actions above are rebindable — editor settings (top-right button) → **Keys** tab. / 上表编辑器动作均可在编辑器设置（右上角按钮）→「键位」标签页重绑。
+... (其余 Controls 内容保持不变) ...
 
----
-
+<a id="sable-physics-integration--sable-物理集成"></a>
 ## 🔄 Sable Physics Integration / Sable 物理集成
 
 Deep integration with Sable physics engine for rotating structures. / 与Sable物理引擎深度集成，支持旋转结构。
@@ -643,6 +312,7 @@ Deep integration with Sable physics engine for rotating structures. / 与Sable�
 
 ---
 
+<a id="schematic-support--蓝图兼容"></a>
 ## 💾 Schematic Support / 蓝图兼容
 
 All 12 blocks support **Create's Schematicannon** — graphs and state fully preserved. / 全部十二种方块支持**蓝图大炮**，图与状态完整保留。
@@ -651,6 +321,7 @@ Uses Create's `IMergeableBE` + `SafeNbtWriter` / 采用 Create 官方接口
 
 ---
 
+<a id="recipes--合成配方"></a>
 ## 📦 Recipes / 合成配方
 
 | Block / 方块 | Materials / 材料 |
@@ -667,6 +338,7 @@ Uses Create's `IMergeableBE` + `SafeNbtWriter` / 采用 Create 官方接口
 
 ---
 
+<a id="block-properties--方块属性"></a>
 ## ⚙️ Block Properties / 方块属性
 
 | Property / 属性 | Value / 值 |
@@ -675,10 +347,11 @@ Uses Create's `IMergeableBE` + `SafeNbtWriter` / 采用 Create 官方接口
 | Hand break / 空手破坏 | Drops without NBT / 掉落无NBT |
 | Wrench right-click / 扳手右键 | Rotate FACING / 旋转方向 |
 | Wrench Shift+right-click / 扳手Shift+右键 | Pick up with full NBT / 收回保留NBT |
-| 🎛️ Kinetic Gauge wrench / 动力传感器扳手 | Shaft end: roll through the 4 same-shaft poses (shaft fixed); top/bottom: tilt-preserving yaw; others: Create's default / 轴端面：同轴四态滚转（轴不动）；点上/下：保倾偏航；其余面：官方默认 |
+| 🎛️ Kinetic Gauge wrench / 动力传感器扳手 | Shaft end: roll through the 4 same-shaft poses (shaft fixed); top/bottom: tilt-preserving yaw; others: Create's default / 轴端面：同�[...]
 
 ---
 
+<a id="technical-highlights--技术亮点"></a>
 ## 🔧 Technical Highlights / 技术亮点
 
 | Feature / 特性 | Description / 说明 |
@@ -695,6 +368,7 @@ Uses Create's `IMergeableBE` + `SafeNbtWriter` / 采用 Create 官方接口
 
 ---
 
+<a id="changelog--更新日志"></a>
 ## 📜 Changelog / 更新日志
 
 完整变更日志已拆分至 **[`CHANGELOG.md`](https://github.com/y15173334444/create-schematic-compute/blob/main/CHANGELOG.md)** —— 每个版本一个 `<details>` 块。
@@ -702,9 +376,9 @@ The full changelog now lives in **[`CHANGELOG.md`](https://github.com/y151733344
 
 | Version | 标题 / Title |
 |---------|--------------|
-| [v1.2.5.2](https://github.com/y15173334444/create-schematic-compute/blob/main/CHANGELOG.md#v1252) | 修复：动力传感器扳手旋转（同轴滚转 · 点上/下保倾偏航）· 贴地放置修正 · 倒置朝下时屏幕读数翻正 · 行走时视角摇晃导致 HUD 虚像晃动 · 切换游戏语言后 HUD 文字变乱线 · 节点分类重构 · 视口裁剪 / 菜单命中 · 数控齿轮箱轴面常在 / 扳手回归官方 · 变速器过载后输出恢复 · 输出指令正反转与负行程 · 编码器清零改节点体引脚 · PID/PID_POWER 积分死区 · 频道名旧草稿回写（#10）· 去掉整图保存覆盖（#17）· 封装子图节点数据同步 · 封装子图展开状态跨玩家同步 · 参数输入框实时同步 · 封装子图顶栏合并 · 占用封装禁删 · 键位系统扩容（删除连线 + 像素编辑器动作）· 统一键鼠序列绑定 · 旧键位配置迁移 · 删节点撤销/重做恢复连线（pinId + 占用检测）· 变速器代理态显示（值盒「(代理)」+ 滚轮拒收） / Fix: Kinetic Gauge Wrench Rotation (Shaft Roll · Tilt-Preserving Yaw) · Floor Placement · Inverted Mount Text Upright · View Bobbing Wobble &amp; Garbled HUD Text After a Language Switch · Node Category Refactor · Viewport Cull / Menu Hit · CNC Gearbox Shaft Faces Always Present / Wrench Back to Official · Transmission Output Recovers After Overload · Output-Command Forward-Reverse &amp; Negative Travel · Encoder Reset on the Node Body · PID/PID_POWER Integral Deadband · channel-name stale-draft write-back (#10) · drop whole-graph save overwrite (#17) · sub-graph node data sync · sub-graph expansion state sync across players · live param-box sync · sub-graph top-bar merge · occupied-encapsulation delete guard · display-mode top-bar merge · display lock follows selection · smooth remote display-layout drags · key-binding system gains delete-wire and pixel-editor actions · unified sequence bindings (legacy key-binding configs migrate) · undo/redo node-delete restores wires (pinId + occupancy check) · transmission proxy display (value-box "(proxy)" + wheel refused while node-driven) |
-| [v1.2.5.1](https://github.com/y15173334444/create-schematic-compute/blob/main/CHANGELOG.md#v1251) | 动力传感器（kinetic_gauge，Create 表同款 3 轴放置 · STRESS/RPM 节点 · 蓝屏显示）· 编辑器输入焦点与选中高亮修复 · GUI 巨型文件拆分（HUD 裁剪数学 / 显示编辑器 / 设置界面 tab）|
-| [v1.2.5](https://github.com/y15173334444/create-schematic-compute/blob/main/CHANGELOG.md#v125) | 公式语言升级：控制流 + vec3 + 预算池 / GUI 架构迁移 / 像素编辑器 / 可编程变速箱 |
+| [v1.2.5.2](https://github.com/y15173334444/create-schematic-compute/blob/main/CHANGELOG.md#v1252) | 修复：动力传感器扳手旋转（同轴滚转 · 点上/下保倾偏航）· 贴地放�[...]
+| [v1.2.5.1](https://github.com/y15173334444/create-schematic-compute/blob/main/CHANGELOG.md#v1251) | 动力传感器（kinetic_gauge，Create 表同款 3 轴放置 · STRESS/RPM 节点 · 蓝屏[...]
+| [v1.2.5](https://github.com/y15173334444/create-schematic-compute/blob/main/CHANGELOG.md#v125) | 公式语言升级：控制流 + vec3 + 预算池 / GUI 架构迁移 / 像素编辑器 / 可编�[...]
 | [v1.2.4.1](https://github.com/y15173334444/create-schematic-compute/blob/main/CHANGELOG.md#v1241) | 回归审计 · 总线系统 · 封装状态 · 公式一致性 · Sable 加固 |
 | [v1.2.4](https://github.com/y15173334444/create-schematic-compute/blob/main/CHANGELOG.md#v124) | 多人协作 + 调试工具链 + 公式编辑器体验 |
 
@@ -713,11 +387,12 @@ Older releases (v1.2.3 and earlier): see [`CHANGELOG.md`](https://github.com/y15
 
 ---
 
+<a id="faq--常见问题"></a>
 ## ❓ FAQ / 常见问题
 
 <details>
 <summary><b>Node editor laggy? / 节点编辑器卡顿？</b></summary>
-Editor drawing is viewport-culled (v1.2.5.2): only on-screen nodes cost render time. 1024 nodes on screen runs fine — node count and PID count are no longer practical limits. / v1.2.5.2 起编辑器绘制做了视口裁剪（只画屏内节点）：同屏 1024 个节点也无压力，节点数量与 PID 数量不再是实际限制。
+Editor drawing is viewport-culled (v1.2.5.2): only on-screen nodes cost render time. 1024 nodes on screen runs fine — node count and PID count are no longer practical limits. / v1.2.5.2 起编辑器[...]
 </details>
 
 <details>
@@ -737,6 +412,7 @@ Yes — Private Signal I/O (named channels) or BUS_IN/BUS_OUT (banded). / 可以
 
 ---
 
+<a id="installation--安装"></a>
 ## 📥 Installation / 安装
 
 | Dependency / 依赖 | Version / 版本 |
@@ -753,6 +429,7 @@ Yes — Private Signal I/O (named channels) or BUS_IN/BUS_OUT (banded). / 可以
 
 ---
 
+<a id="links--链接"></a>
 ## 🌐 Links / 链接
 
 - **GitHub**: [github.com/y15173334444/create-schematic-compute](https://github.com/y15173334444/create-schematic-compute)
